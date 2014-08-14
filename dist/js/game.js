@@ -19,45 +19,28 @@ window.onload = function () {
 'use strict';
 
 var Drop = function(game, player, x, y) {
-  var belt = game.add.bitmapData(50, 400);
-  // belt.fill(200, 100, 0, 1);
-  belt.ctx.fillStyle = 'red';
-  belt.ctx.beginPath();
-  belt.ctx.fillRect(0, 0, 50, 400);
-  belt.render();
-  belt.refreshBuffer();
-  // createPrimatives(spriteBMD, buttonBMD);
-  // sprite = game.add.sprite(game.width /  2, game.height/2, spriteBMD);
+  var beltBMD = game.add.bitmapData(50, 400);
+  beltBMD.ctx.fillStyle = 'red';
+  beltBMD.ctx.fillRect(0, 0, 50, 400);
+  Phaser.Sprite.call(this, game, x, y, beltBMD);
 
-  Phaser.Sprite.call(this, game, x, y, belt);
-  this.game.physics.arcade.enable(this);
-  debugger
-  this.game.physics.arcade.collide(this, player, this.applyEffect, null, this);
+  this.player = player
+  this.game.physics.arcade.enableBody(this);
+  this.body.collideWorldBounds = true
   this.game.time.events.add(2000, this.destroy, this);
   this.game.add.existing(this);
-  player.bringToTop()
+  this.player.bringToTop()
 };
 
 Drop.prototype = Object.create(Phaser.Sprite.prototype);
 Drop.prototype.constructor = Drop;
 
 Drop.prototype.update = function() {
-  // debugger
+  this.game.physics.arcade.overlap(this, this.game.players, this.applyEffect, null, this);
 };
 
-Drop.prototype.blah = function(drop, player) {
-  console.log(player.body);
-  console.log(drop.body);
-}
 Drop.prototype.applyEffect = function(drop, player) {
-  debugger
-  // var count = 0;
-  // while (this.body.checkCollision.any) {
-  //   console.log(this.body.checkCollision.any)
-  //   if (count > 2000) { return }
-  //   player.body.velocity.y += 400;
-  //   count++;
-  // }
+  player.body.velocity.y += 400;
 }
 
 module.exports = Drop;
@@ -206,7 +189,6 @@ Player.prototype.moveSprite = function (pointer) {
 module.exports = Player;
 
 },{"./drop":2}],4:[function(require,module,exports){
-
 'use strict';
 
 function Boot() {
@@ -225,31 +207,24 @@ Boot.prototype = {
 module.exports = Boot;
 
 },{}],5:[function(require,module,exports){
-
 'use strict';
+
 function GameOver() {}
 
 GameOver.prototype = {
   preload: function () {
-
   },
+
   create: function () {
-    var style = { font: '65px Arial', fill: '#ffffff', align: 'center'};
-    this.titleText = this.game.add.text(this.game.world.centerX,100, 'Game Over!', style);
-    this.titleText.anchor.setTo(0.5, 0.5);
-
-    this.congratsText = this.game.add.text(this.game.world.centerX, 200, 'You Win!', { font: '32px Arial', fill: '#ffffff', align: 'center'});
-    this.congratsText.anchor.setTo(0.5, 0.5);
-
-    this.instructionText = this.game.add.text(this.game.world.centerX, 300, 'Click To Play Again', { font: '16px Arial', fill: '#ffffff', align: 'center'});
-    this.instructionText.anchor.setTo(0.5, 0.5);
   },
+
   update: function () {
     if(this.game.input.activePointer.justPressed()) {
       this.game.state.start('play');
     }
   }
 };
+
 module.exports = GameOver;
 
 },{}],6:[function(require,module,exports){
@@ -293,8 +268,11 @@ Play.prototype = {
     this.backGround.resizeWorld();
     this.foreGround.resizeWorld();
 
-    this.player = new Player(this.game, 150, 150, 0)
-    this.game.add.existing(this.player);
+    var player = new Player(this.game, 150, 150, 0)
+    this.game.add.existing(player);
+
+    this.game.players = [];
+    this.game.players.push(player);
   },
 
   update: function() {
@@ -317,14 +295,12 @@ function Preload() {
 
 Preload.prototype = {
   preload: function() {
-
     this.load.tilemap('lvl1', 'assets/dropz1.json', null, Phaser.Tilemap.TILED_JSON);
     this.load.image('groundTiles', 'assets/grass-tiles-2-small.png');
     this.load.image('tree', 'assets/tree2-final.png');
 
     this.load.spritesheet('playerMovements', 'assets/playerMovements.png', 64, 64, 16);
 
-    this.load.image('tree', 'assets/tree2-final.png');
     this.onLoadComplete()
   },
 
@@ -336,6 +312,7 @@ Preload.prototype = {
       this.game.state.start('play');
     }
   },
+
   onLoadComplete: function() {
     this.ready = true;
   }

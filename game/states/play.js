@@ -17,8 +17,11 @@ Play.prototype = {
     this.backGround.resizeWorld();
     this.foreGround.resizeWorld();
 
-    this.player = new Player(this.game, 150, 150, 0)
-    this.game.add.existing(this.player);
+    var player = new Player(this.game, 150, 150, 0)
+    this.game.add.existing(player);
+
+    this.game.players = [];
+    this.game.players.push(player);
   },
 
   update: function() {
