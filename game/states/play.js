@@ -1,26 +1,32 @@
+'use strict';
 
-  'use strict';
-  function Play() {}
-  Play.prototype = {
-    create: function() {
-      this.game.physics.startSystem(Phaser.Physics.ARCADE);
-      this.sprite = this.game.add.sprite(this.game.width/2, this.game.height/2, 'yeoman');
-      this.sprite.inputEnabled = true;
-      
-      this.game.physics.arcade.enable(this.sprite);
-      this.sprite.body.collideWorldBounds = true;
-      this.sprite.body.bounce.setTo(1,1);
-      this.sprite.body.velocity.x = this.game.rnd.integerInRange(-500,500);
-      this.sprite.body.velocity.y = this.game.rnd.integerInRange(-500,500);
+var Player = require('../prefabs/player')
 
-      this.sprite.events.onInputDown.add(this.clickListener, this);
-    },
-    update: function() {
+function Play() {}
+Play.prototype = {
+  create: function() {
+    this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
-    },
-    clickListener: function() {
-      this.game.state.start('gameover');
-    }
-  };
-  
-  module.exports = Play;
+    this.map = this.game.add.tilemap('lvl1');
+    this.map.addTilesetImage("grass-tiles-2-small", 'groundTiles');
+    this.map.addTilesetImage("tree2-final", 'tree');
+
+    this.backGround = this.map.createLayer("Background");
+    this.foreGround = this.map.createLayer("Foreground");
+
+    this.backGround.resizeWorld();
+    this.foreGround.resizeWorld();
+
+    this.player = new Player(this.game, 150, 150, 0)
+    this.game.add.existing(this.player);
+  },
+
+  update: function() {
+  },
+
+  clickListener: function() {
+    this.game.state.start('gameover');
+  }
+};
+
+module.exports = Play;

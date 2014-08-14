@@ -1,0 +1,28 @@
+{"frames": {
+
+"playerStrafe.png":
+{
+	"frame": {"x":2,"y":2,"w":512,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":512,"h":64},
+	"sourceSize": {"w":512,"h":64}
+},
+"playerWalk.png":
+{
+	"frame": {"x":516,"y":2,"w":512,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":512,"h":64},
+	"sourceSize": {"w":512,"h":64}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker ",
+	"version": "1.0",
+	"image": "playerMovements.png",
+	"format": "RGBA8888",
+	"size": {"w":1030,"h":68},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:8ade62bba5328bca17cc73527bc6d47c:71a17afdf44365349e1834fc3f4859df:38e9e2bffa747466037f84dab40d1136$"
+}
+}

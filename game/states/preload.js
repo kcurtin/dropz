@@ -1,5 +1,5 @@
-
 'use strict';
+
 function Preload() {
   this.asset = null;
   this.ready = false;
@@ -7,20 +7,23 @@ function Preload() {
 
 Preload.prototype = {
   preload: function() {
-    this.asset = this.add.sprite(this.width/2,this.height/2, 'preloader');
-    this.asset.anchor.setTo(0.5, 0.5);
 
-    this.load.onLoadComplete.addOnce(this.onLoadComplete, this);
-    this.load.setPreloadSprite(this.asset);
-    this.load.image('yeoman', 'assets/yeoman-logo.png');
+    this.load.tilemap('lvl1', 'assets/dropz1.json', null, Phaser.Tilemap.TILED_JSON);
+    this.load.image('groundTiles', 'assets/grass-tiles-2-small.png');
+    this.load.image('tree', 'assets/tree2-final.png');
 
+    this.load.spritesheet('playerMovements', 'assets/playerMovements.png', 64, 64, 16);
+
+    this.load.image('tree', 'assets/tree2-final.png');
+    this.onLoadComplete()
   },
+
   create: function() {
-    this.asset.cropEnabled = false;
   },
+
   update: function() {
     if(!!this.ready) {
-      this.game.state.start('menu');
+      this.game.state.start('play');
     }
   },
   onLoadComplete: function() {
