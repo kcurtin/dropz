@@ -65,7 +65,7 @@ var Player = function(game, x, y, frame) {
   this.dropKey2 = game.input.keyboard.addKey(Phaser.Keyboard.E);
   this.dropKey3 = game.input.keyboard.addKey(Phaser.Keyboard.T);
 
-  this.game.input.onDown.add(this.moveToLocation, this);
+  this.game.input.onDown.add(this.markLocation, this);
 
   this.dropKey.onDown.add(this.dropCircle, this);
   this.dropKey2.onDown.add(this.dropBelt, this);
@@ -77,24 +77,25 @@ Player.prototype = Object.create(Phaser.Sprite.prototype);
 Player.prototype.constructor = Player;
 
 Player.prototype.update = function() {
-  if (this.lastPointer) {
-    if (this.game.physics.arcade.distanceToPointer(this, this.lastPointer) > 8) {
-      this.game.physics.arcade.moveToXY(this, this.lastPointer.x, this.lastPointer.y, 100);
+  if (this.markedLocationY && this.markedLocationX) {
+    if (this.game.physics.arcade.distanceToXY(this, this.markedLocationX, this.markedLocationY) > 8) {
+      if (this.game.input.activePointer.isDown) {
+        // this.body.acceleration.x = 200;
+      }
+      this.game.physics.arcade.moveToXY(this, this.markedLocationX, this.markedLocationY, 100);
     } else {
-      this.body.velocity = 0;
+      this.body.velocity.setTo(0);
       this.idle();
+      this.markedLocationY = null;
+      this.markedLocationX = null;
     }
   }
 };
 
-Player.prototype.moveToLocation = function(pointer) {
-  var tween,
-      duration;
-
-  this.lastPointer = pointer;
+Player.prototype.markLocation = function(pointer) {
+  this.markedLocationX = pointer.x;
+  this.markedLocationY = pointer.y;
   this.rotation = this.game.physics.arcade.angleToPointer(this, pointer) + 1.57079633;
-  duration = (this.game.physics.arcade.distanceToPointer(this, pointer) / 100) * 1000;
-  // tween = this.game.add.tween(this).to({ x: pointer.x, y: pointer.y }, duration, Phaser.Easing.Linear.None, true);
   this.move();
 }
 
