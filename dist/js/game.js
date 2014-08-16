@@ -61,20 +61,12 @@ var Player = function(game, x, y, frame) {
   this.animations.add('walk', [8,9,10,11,12,13,14], 10, true);
   this.animations.add('strafe', [0,1,2,3,4,5,6,7], 10, true);
 
-  this.upKey = game.input.keyboard.addKey(Phaser.Keyboard.W);
-  this.downKey = game.input.keyboard.addKey(Phaser.Keyboard.S);
-  this.leftKey = game.input.keyboard.addKey(Phaser.Keyboard.A);
-  this.rightKey = game.input.keyboard.addKey(Phaser.Keyboard.D);
   this.dropKey = game.input.keyboard.addKey(Phaser.Keyboard.Q);
   this.dropKey2 = game.input.keyboard.addKey(Phaser.Keyboard.E);
   this.dropKey3 = game.input.keyboard.addKey(Phaser.Keyboard.T);
 
-  game.input.onDown.add(this.moveSprite, this);
+  this.game.input.onDown.add(this.moveToLocation, this);
 
-  this.downKey.onDown.add(this.moveLoad, this);
-  this.upKey.onDown.add(this.moveLoad, this);
-  this.leftKey.onDown.add(this.strafeLoad, this);
-  this.rightKey.onDown.add(this.strafeLoad, this);
   this.dropKey.onDown.add(this.dropCircle, this);
   this.dropKey2.onDown.add(this.dropBelt, this);
   this.dropKey3.onDown.add(this.dropTimeBomb, this);
@@ -83,6 +75,28 @@ var Player = function(game, x, y, frame) {
 
 Player.prototype = Object.create(Phaser.Sprite.prototype);
 Player.prototype.constructor = Player;
+
+Player.prototype.update = function() {
+  if (this.lastPointer) {
+    if (this.game.physics.arcade.distanceToPointer(this, this.lastPointer) > 8) {
+      this.game.physics.arcade.moveToXY(this, this.lastPointer.x, this.lastPointer.y, 100);
+    } else {
+      this.body.velocity = 0;
+      this.idle();
+    }
+  }
+};
+
+Player.prototype.moveToLocation = function(pointer) {
+  var tween,
+      duration;
+
+  this.lastPointer = pointer;
+  this.rotation = this.game.physics.arcade.angleToPointer(this, pointer) + 1.57079633;
+  duration = (this.game.physics.arcade.distanceToPointer(this, pointer) / 100) * 1000;
+  // tween = this.game.add.tween(this).to({ x: pointer.x, y: pointer.y }, duration, Phaser.Easing.Linear.None, true);
+  this.move();
+}
 
 Player.prototype.dropBelt = function() {
   new Drop(this.game, this, this.x - 25, this.y);
@@ -119,48 +133,6 @@ Player.prototype.dropCircle = function() {
   this.bringToTop()
 }
 
-Player.prototype.moveLoad = function() {
-}
-
-Player.prototype.strafeLoad = function() {
-}
-
-Player.prototype.update = function() {
-  if (this.upKey.isDown)
-  {
-    this.body.velocity.y = -150;
-  }
-  else if (this.downKey.isDown)
-  {
-    this.body.velocity.y = +150;
-  }
-  else if (!this.upKey.isDown || !this.downKey.isDown)
-  {
-    this.body.velocity.y = 0;
-  }
-
-  if (this.leftKey.isDown)
-  {
-    this.body.velocity.x = -150;
-  }
-  else if (this.rightKey.isDown)
-  {
-    this.body.velocity.x = +150;
-  }
-  else if (!this.leftKey.isDown || !this.rightKey.isDown)
-  {
-    this.body.velocity.x = 0;
-  }
-
-  if (this.body.velocity.y != 0) {
-    this.move();
-  } else if (this.body.velocity.x != 0) {
-    this.strafe();
-  } else {
-    this.idle();
-  }
-};
-
 Player.prototype.move = function() {
   this.animations.play('walk');
 }
@@ -173,19 +145,6 @@ Player.prototype.idle = function() {
   this.animations.play("idle");
 }
 
-Player.prototype.moveSprite = function (pointer) {
-  if (tween && tween.isRunning) {
-    tween.stop();
-    // this.animations.play('idle');
-  }
-
-  // this.animations.play('walk');
-  var angleInRadians = this.game.physics.arcade.angleToPointer(this, pointer);
-  this.angle = angleInRadians * (180 / 3.14) + 90
-  var duration = (this.game.physics.arcade.distanceToPointer(this, pointer) / 300) * 1000;
-  var tween = this.game.add.tween(this).to({ x: pointer.x, y: pointer.y }, duration, Phaser.Easing.Linear.None, true);
-}
-
 module.exports = Player;
 
 },{"./drop":2}],4:[function(require,module,exports){
@@ -196,8 +155,8 @@ function Boot() {
 
 Boot.prototype = {
   preload: function() {
-    this.load.image('preloader', 'assets/preloader.gif');
   },
+
   create: function() {
     this.game.input.maxPointers = 1;
     this.game.state.start('preload');
@@ -259,17 +218,13 @@ Play.prototype = {
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
     this.map = this.game.add.tilemap('lvl1');
-    this.map.addTilesetImage("grass-tiles-2-small", 'groundTiles');
-    this.map.addTilesetImage("tree2-final", 'tree');
-
+    this.map.addTilesetImage("war2-wasteland-tiles", 'wastelandTiles');
     this.backGround = this.map.createLayer("Background");
-    this.foreGround = this.map.createLayer("Foreground");
-
     this.backGround.resizeWorld();
-    this.foreGround.resizeWorld();
 
     var player = new Player(this.game, 150, 150, 0)
     this.game.add.existing(player);
+    this.game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN);
 
     this.game.players = [];
     this.game.players.push(player);
@@ -295,12 +250,10 @@ function Preload() {
 
 Preload.prototype = {
   preload: function() {
-    this.load.tilemap('lvl1', 'assets/dropz1.json', null, Phaser.Tilemap.TILED_JSON);
-    this.load.image('groundTiles', 'assets/grass-tiles-2-small.png');
-    this.load.image('tree', 'assets/tree2-final.png');
+    this.load.tilemap('lvl1', 'assets/wasteland1.json', null, Phaser.Tilemap.TILED_JSON);
+    this.load.image("wastelandTiles", "assets/war2-wasteland-tiles.png");
 
     this.load.spritesheet('playerMovements', 'assets/playerMovements.png', 64, 64, 16);
-
     this.onLoadComplete()
   },
 

@@ -8,17 +8,13 @@ Play.prototype = {
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
     this.map = this.game.add.tilemap('lvl1');
-    this.map.addTilesetImage("grass-tiles-2-small", 'groundTiles');
-    this.map.addTilesetImage("tree2-final", 'tree');
-
+    this.map.addTilesetImage("war2-wasteland-tiles", 'wastelandTiles');
     this.backGround = this.map.createLayer("Background");
-    this.foreGround = this.map.createLayer("Foreground");
-
     this.backGround.resizeWorld();
-    this.foreGround.resizeWorld();
 
     var player = new Player(this.game, 150, 150, 0)
     this.game.add.existing(player);
+    this.game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN);
 
     this.game.players = [];
     this.game.players.push(player);
