@@ -64,7 +64,7 @@ var Player = function(game, x, y, frame) {
   this.body.collideWorldBounds = true
   this.anchor.setTo(0.5, 0.5);
 
-  // this.makeParticle()
+  this.makeEmitter()
 
   this.animations.add('idle', [0], 1, false);
   this.animations.add('walk', [8,9,10,11,12,13,14], 10, true);
@@ -75,7 +75,7 @@ var Player = function(game, x, y, frame) {
   this.dropKey3 = game.input.keyboard.addKey(Phaser.Keyboard.T);
 
   this.game.input.onDown.add(this.markLocation, this);
-  this.game.input.onDown.add(this.makeParticle, this);
+  this.game.input.onDown.add(this.emitParticles, this);
 
   this.dropKey.onDown.add(this.dropCircle, this);
   this.dropKey2.onDown.add(this.dropBelt, this);
@@ -87,6 +87,9 @@ Player.prototype = Object.create(Phaser.Sprite.prototype);
 Player.prototype.constructor = Player;
 
 Player.prototype.update = function() {
+  if (this.game.input.activePointer.isUp) {
+    this.stopParticles()
+  }
   if (this.markedLocationY && this.markedLocationX) {
     if (this.game.physics.arcade.distanceToXY(this, this.markedLocationX, this.markedLocationY) > 8) {
       if (this.game.input.activePointer.isDown) {
@@ -102,7 +105,14 @@ Player.prototype.update = function() {
   }
 };
 
-Player.prototype.makeParticle = function(pointer) {
+Player.prototype.emitParticles = function(pointer) {
+  this.emitter.x = pointer.x;
+  this.emitter.y = pointer.y;
+
+  this.emitter.start(false, 400, 100);
+}
+
+Player.prototype.makeEmitter = function() {
   var game = this.game;
   // Create our bitmapData which we'll use as our particle texture
   var bmd = game.add.bitmapData(64, 64);
@@ -114,21 +124,25 @@ Player.prototype.makeParticle = function(pointer) {
   //  Put the bitmapData into the cache
   game.cache.addBitmapData('particleShade', bmd);
   //  Create our emitter
-  emitter = game.add.emitter(game.world.centerX, pointer.x, pointer.y);
-  // emitter.width = 800;
-  emitter.x = pointer.x;
-  emitter.y = pointer.y;
+  var emitter = game.add.emitter(0, 0)
+
   //  Here is the important line. This will tell the Emitter to emit our custom MonsterParticle class instead of a normal Particle object.
   emitter.particleClass = MonsterParticle;
   emitter.makeParticles();
-  emitter.minParticleSpeed.set(0, 300);
-  emitter.maxParticleSpeed.set(0, 400);
+  // emitter.minParticleSpeed.set(0, 300);
+  // emitter.maxParticleSpeed.set(0, 400);
   emitter.setRotation(0, 0);
   emitter.setScale(0.1, 1, 0.1, 1, 12000, Phaser.Easing.Quintic.Out);
-  emitter.gravity = -200;
-  emitter.start(false, 2000, 100);
-  game.input.onDown.add(this.updateBitmapDataTexture, this);
+  // emitter.gravity = -200;
+
+  this.emitter = emitter;
 }
+
+Player.prototype.stopParticles = function() {
+  this.emitter.on = false;
+  // this.emitter.kill();
+}
+
 
 Player.prototype.updateBitmapDataTexture = function() {
   game = this.game;
