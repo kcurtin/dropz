@@ -14,7 +14,7 @@ Play.prototype = {
     this.backGround.resizeWorld();
 
     var emitter = new SprenEmitter(this.game, 200, 200);
-    this.game.add.existing(emitter);
+    // this.game.add.existing(emitter);
 
     var player = new Player(this.game, 150, 150, 0)
     this.game.add.existing(player);

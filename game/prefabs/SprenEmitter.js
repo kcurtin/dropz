@@ -4,26 +4,25 @@ var Spren = require('./spren');
 
 var SprenEmitter = function(game, x, y, frame) {
   Phaser.Particles.Arcade.Emitter.call(this, game, x, y);
+  this.width = 800;
   this.particleClass = Spren;
   this.makeParticles();
+  this.minParticleSpeed.set(0, 300);
+  this.maxParticleSpeed.set(0, 400);
   this.setRotation(0, 0);
   this.setScale(0.1, 1, 0.1, 1, 12000, Phaser.Easing.Quintic.Out);
+  this.gravity = -200;
   this.game.input.onDown.add(this.emitParticles, this);
+  this.game.input.onUp.add(this.stopParticles, this);
 };
 
 SprenEmitter.prototype = Object.create(Phaser.Particles.Arcade.Emitter.prototype);
 SprenEmitter.prototype.constructor = SprenEmitter;
 
-SprenEmitter.prototype.update = function() {
-  if (this.game.input.activePointer.isUp) {
-    this.stopParticles();
-  }
-};
-
 SprenEmitter.prototype.emitParticles = function(pointer) {
   this.x = pointer.x;
   this.y = pointer.y;
-  this.start(false, 400, 100);
+  this.start(false, 5000, 100);
 }
 
 SprenEmitter.prototype.stopParticles = function() {
@@ -46,6 +45,5 @@ SprenEmitter.prototype.updateBitmapDataTexture = function() {
 
   bmd.dirty = true;
 }
-
 
 module.exports = SprenEmitter;

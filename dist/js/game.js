@@ -22,26 +22,25 @@ var Spren = require('./spren');
 
 var SprenEmitter = function(game, x, y, frame) {
   Phaser.Particles.Arcade.Emitter.call(this, game, x, y);
+  this.width = 800;
   this.particleClass = Spren;
   this.makeParticles();
+  this.minParticleSpeed.set(0, 300);
+  this.maxParticleSpeed.set(0, 400);
   this.setRotation(0, 0);
   this.setScale(0.1, 1, 0.1, 1, 12000, Phaser.Easing.Quintic.Out);
+  this.gravity = -200;
   this.game.input.onDown.add(this.emitParticles, this);
+  this.game.input.onUp.add(this.stopParticles, this);
 };
 
 SprenEmitter.prototype = Object.create(Phaser.Particles.Arcade.Emitter.prototype);
 SprenEmitter.prototype.constructor = SprenEmitter;
 
-SprenEmitter.prototype.update = function() {
-  if (this.game.input.activePointer.isUp) {
-    this.stopParticles();
-  }
-};
-
 SprenEmitter.prototype.emitParticles = function(pointer) {
   this.x = pointer.x;
   this.y = pointer.y;
-  this.start(false, 400, 100);
+  this.start(false, 5000, 100);
 }
 
 SprenEmitter.prototype.stopParticles = function() {
@@ -64,7 +63,6 @@ SprenEmitter.prototype.updateBitmapDataTexture = function() {
 
   bmd.dirty = true;
 }
-
 
 module.exports = SprenEmitter;
 
@@ -205,7 +203,7 @@ module.exports = Player;
 },{"./drop":3}],5:[function(require,module,exports){
 'use strict';
 
-var Spren = function(game, x, y) {
+var Spren = function (game, x, y) {
   var bmd = game.add.bitmapData(64, 64);
   var radgrad = bmd.ctx.createRadialGradient(32, 32, 4, 32, 32, 32);
   radgrad.addColorStop(0, 'rgba(1, 159, 98, 1)');
@@ -213,15 +211,11 @@ var Spren = function(game, x, y) {
   bmd.context.fillStyle = radgrad;
   bmd.context.fillRect(0, 0, 64, 64);
   game.cache.addBitmapData('particleShade', bmd);
-
   Phaser.Particle.call(this, game, x, y, game.cache.getBitmapData('particleShade'));
 };
 
 Spren.prototype = Object.create(Phaser.Particle.prototype);
 Spren.prototype.constructor = Spren;
-
-Spren.prototype.update = function() {
-};
 
 module.exports = Spren;
 
@@ -302,7 +296,7 @@ Play.prototype = {
     this.backGround.resizeWorld();
 
     var emitter = new SprenEmitter(this.game, 200, 200);
-    this.game.add.existing(emitter);
+    // this.game.add.existing(emitter);
 
     var player = new Player(this.game, 150, 150, 0)
     this.game.add.existing(player);
