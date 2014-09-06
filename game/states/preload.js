@@ -10,7 +10,7 @@ Preload.prototype = {
     this.load.tilemap('lvl1', 'assets/wasteland1.json', null, Phaser.Tilemap.TILED_JSON);
     this.load.image("wastelandTiles", "assets/war2-wasteland-tiles.png");
 
-    this.load.spritesheet('playerMovements', 'assets/playerMovements.png', 64, 64, 16);
+    this.load.spritesheet('playerMovements', 'assets/playerMovements2.png', 64, 64, 16);
     this.onLoadComplete()
   },
 

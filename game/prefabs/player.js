@@ -13,8 +13,13 @@ var Player = function(game, x, y, frame) {
   this.animations.add('walk', [8,9,10,11,12,13,14], 10, true);
   this.animations.add('strafe', [0,1,2,3,4,5,6,7], 10, true);
 
-  this.dropKey = game.input.keyboard.addKey(Phaser.Keyboard.Q);
-  this.dropKey2 = game.input.keyboard.addKey(Phaser.Keyboard.E);
+  this.upKey = game.input.keyboard.addKey(Phaser.Keyboard.E);
+  this.downKey = game.input.keyboard.addKey(Phaser.Keyboard.D);
+  this.leftKey = game.input.keyboard.addKey(Phaser.Keyboard.S);
+  this.rightKey = game.input.keyboard.addKey(Phaser.Keyboard.F);
+
+  this.dropKey = game.input.keyboard.addKey(Phaser.Keyboard.W);
+  this.dropKey2 = game.input.keyboard.addKey(Phaser.Keyboard.R);
   this.dropKey3 = game.input.keyboard.addKey(Phaser.Keyboard.T);
 
   this.game.input.onDown.add(this.markLocation, this);
@@ -28,32 +33,60 @@ Player.prototype = Object.create(Phaser.Sprite.prototype);
 Player.prototype.constructor = Player;
 
 Player.prototype.update = function() {
-  if (this.markedLocationY && this.markedLocationX) {
-    if (this.game.physics.arcade.distanceToXY(this, this.markedLocationX, this.markedLocationY) > 8) {
-      if (this.game.input.activePointer.isDown) {
-        this.game.physics.arcade.accelerateToXY(this, this.markedLocationX, this.markedLocationY, 100, 500, 500);
-      } else {
-        this.game.physics.arcade.moveToXY(this, this.markedLocationX, this.markedLocationY, 100);
-      }
-    } else {
-      this.body.velocity.setTo(0);
-      this.body.acceleration.setTo(0);
-      this.idle();
-      this.markedLocationY = null;
-      this.markedLocationX = null;
+  this.body.velocity.y = 0;
+  this.body.velocity.x = 0;
+  this.body.angularVelocity = 0;
+
+  if (this.upKey.isDown ||this.downKey.isDown || this.leftKey.isDown || this.rightKey.isDown) {
+    if (this.upKey.isDown) {
+      this.game.physics.arcade.velocityFromAngle(this.angle, 100, this.body.velocity);
+      this.move();
     }
+
+    if (this.downKey.isDown) {
+      this.game.physics.arcade.velocityFromAngle(this.angle, -100, this.body.velocity);
+      this.move();
+    }
+
+    if (this.leftKey.isDown) {
+      this.body.angularVelocity = -425;
+      this.strafe();
+    }
+
+    if (this.rightKey.isDown) {
+      this.body.angularVelocity = 425;
+      this.strafe();
+    }
+  } else {
+    this.idle();
   }
+
+  // if (this.markedLocationY && this.markedLocationX) {
+  //   if (this.game.physics.arcade.distanceToXY(this, this.markedLocationX, this.markedLocationY) > 8) {
+  //     if (this.game.input.activePointer.isDown) {
+  //       this.game.physics.arcade.accelerateToXY(this, this.markedLocationX, this.markedLocationY, 100, 500, 500);
+  //     } else {
+  //       this.game.physics.arcade.moveToXY(this, this.markedLocationX, this.markedLocationY, 100);
+  //     }
+  //   } else {
+  //     this.body.velocity.setTo(0);
+  //     this.body.acceleration.setTo(0);
+  //     this.idle();
+  //     this.markedLocationY = null;
+  //     this.markedLocationX = null;
+  //   }
+  // }
 };
 
 Player.prototype.markLocation = function(pointer) {
   this.markedLocationX = pointer.x;
   this.markedLocationY = pointer.y;
-  this.rotation = this.game.physics.arcade.angleToPointer(this, pointer) + 1.57079633;
+  this.rotation = this.game.physics.arcade.angleToPointer(this, pointer);
   this.move();
 }
 
 Player.prototype.dropBelt = function() {
-  new Drop(this.game, this, this.x - 25, this.y);
+  new Drop(this.game, this, this.x, this.y);
 }
 
 Player.prototype.dropTimeBomb = function() {

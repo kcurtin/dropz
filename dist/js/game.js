@@ -69,18 +69,24 @@ module.exports = SprenEmitter;
 },{"./spren":5}],3:[function(require,module,exports){
 'use strict';
 
+var drops = [];
+
 var Drop = function(game, player, x, y) {
-  var beltBMD = game.add.bitmapData(50, 400);
-  beltBMD.ctx.fillStyle = 'red';
-  beltBMD.ctx.fillRect(0, 0, 50, 400);
+  var beltBMD = game.add.bitmapData(400, 50);
+  beltBMD.fill(191,64,64, 0.8);
   Phaser.Sprite.call(this, game, x, y, beltBMD);
 
-  this.player = player
+  this.player = player;
+  this.rotation = player.rotation;
   this.game.physics.arcade.enableBody(this);
   this.body.collideWorldBounds = true
+  this.anchor.setTo(.0005, 0.5);
   this.game.time.events.add(2000, this.destroy, this);
+  this.removeExisting();
   this.game.add.existing(this);
+  drops.push(this);
   this.player.bringToTop()
+  window.drop = this;
 };
 
 Drop.prototype = Object.create(Phaser.Sprite.prototype);
@@ -91,7 +97,12 @@ Drop.prototype.update = function() {
 };
 
 Drop.prototype.applyEffect = function(drop, player) {
-  player.body.velocity.y += 400;
+  this.game.physics.arcade.velocityFromAngle(this.angle, 300, this.player.body.velocity);
+}
+Drop.prototype.removeExisting = function() {
+  // if (drops[0]) {
+  //   drops[0].destroy();
+  // }
 }
 
 module.exports = Drop;
@@ -112,8 +123,13 @@ var Player = function(game, x, y, frame) {
   this.animations.add('walk', [8,9,10,11,12,13,14], 10, true);
   this.animations.add('strafe', [0,1,2,3,4,5,6,7], 10, true);
 
-  this.dropKey = game.input.keyboard.addKey(Phaser.Keyboard.Q);
-  this.dropKey2 = game.input.keyboard.addKey(Phaser.Keyboard.E);
+  this.upKey = game.input.keyboard.addKey(Phaser.Keyboard.E);
+  this.downKey = game.input.keyboard.addKey(Phaser.Keyboard.D);
+  this.leftKey = game.input.keyboard.addKey(Phaser.Keyboard.S);
+  this.rightKey = game.input.keyboard.addKey(Phaser.Keyboard.F);
+
+  this.dropKey = game.input.keyboard.addKey(Phaser.Keyboard.W);
+  this.dropKey2 = game.input.keyboard.addKey(Phaser.Keyboard.R);
   this.dropKey3 = game.input.keyboard.addKey(Phaser.Keyboard.T);
 
   this.game.input.onDown.add(this.markLocation, this);
@@ -127,32 +143,60 @@ Player.prototype = Object.create(Phaser.Sprite.prototype);
 Player.prototype.constructor = Player;
 
 Player.prototype.update = function() {
-  if (this.markedLocationY && this.markedLocationX) {
-    if (this.game.physics.arcade.distanceToXY(this, this.markedLocationX, this.markedLocationY) > 8) {
-      if (this.game.input.activePointer.isDown) {
-        this.game.physics.arcade.accelerateToXY(this, this.markedLocationX, this.markedLocationY, 100, 500, 500);
-      } else {
-        this.game.physics.arcade.moveToXY(this, this.markedLocationX, this.markedLocationY, 100);
-      }
-    } else {
-      this.body.velocity.setTo(0);
-      this.body.acceleration.setTo(0);
-      this.idle();
-      this.markedLocationY = null;
-      this.markedLocationX = null;
+  this.body.velocity.y = 0;
+  this.body.velocity.x = 0;
+  this.body.angularVelocity = 0;
+
+  if (this.upKey.isDown ||this.downKey.isDown || this.leftKey.isDown || this.rightKey.isDown) {
+    if (this.upKey.isDown) {
+      this.game.physics.arcade.velocityFromAngle(this.angle, 100, this.body.velocity);
+      this.move();
     }
+
+    if (this.downKey.isDown) {
+      this.game.physics.arcade.velocityFromAngle(this.angle, -100, this.body.velocity);
+      this.move();
+    }
+
+    if (this.leftKey.isDown) {
+      this.body.angularVelocity = -425;
+      this.strafe();
+    }
+
+    if (this.rightKey.isDown) {
+      this.body.angularVelocity = 425;
+      this.strafe();
+    }
+  } else {
+    this.idle();
   }
+
+  // if (this.markedLocationY && this.markedLocationX) {
+  //   if (this.game.physics.arcade.distanceToXY(this, this.markedLocationX, this.markedLocationY) > 8) {
+  //     if (this.game.input.activePointer.isDown) {
+  //       this.game.physics.arcade.accelerateToXY(this, this.markedLocationX, this.markedLocationY, 100, 500, 500);
+  //     } else {
+  //       this.game.physics.arcade.moveToXY(this, this.markedLocationX, this.markedLocationY, 100);
+  //     }
+  //   } else {
+  //     this.body.velocity.setTo(0);
+  //     this.body.acceleration.setTo(0);
+  //     this.idle();
+  //     this.markedLocationY = null;
+  //     this.markedLocationX = null;
+  //   }
+  // }
 };
 
 Player.prototype.markLocation = function(pointer) {
   this.markedLocationX = pointer.x;
   this.markedLocationY = pointer.y;
-  this.rotation = this.game.physics.arcade.angleToPointer(this, pointer) + 1.57079633;
+  this.rotation = this.game.physics.arcade.angleToPointer(this, pointer);
   this.move();
 }
 
 Player.prototype.dropBelt = function() {
-  new Drop(this.game, this, this.x - 25, this.y);
+  new Drop(this.game, this, this.x, this.y);
 }
 
 Player.prototype.dropTimeBomb = function() {
@@ -301,6 +345,7 @@ Play.prototype = {
     var player = new Player(this.game, 150, 150, 0)
     this.game.add.existing(player);
     this.game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN);
+    window.player = player;
 
     this.game.players = [];
     this.game.players.push(player);
@@ -329,7 +374,7 @@ Preload.prototype = {
     this.load.tilemap('lvl1', 'assets/wasteland1.json', null, Phaser.Tilemap.TILED_JSON);
     this.load.image("wastelandTiles", "assets/war2-wasteland-tiles.png");
 
-    this.load.spritesheet('playerMovements', 'assets/playerMovements.png', 64, 64, 16);
+    this.load.spritesheet('playerMovements', 'assets/playerMovements2.png', 64, 64, 16);
     this.onLoadComplete()
   },
 

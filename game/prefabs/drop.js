@@ -1,17 +1,23 @@
 'use strict';
 
+var drops = [];
+
 var Drop = function(game, player, x, y) {
-  var beltBMD = game.add.bitmapData(50, 400);
-  beltBMD.ctx.fillStyle = 'red';
-  beltBMD.ctx.fillRect(0, 0, 50, 400);
+  var beltBMD = game.add.bitmapData(400, 50);
+  beltBMD.fill(191,64,64, 0.8);
   Phaser.Sprite.call(this, game, x, y, beltBMD);
 
-  this.player = player
+  this.player = player;
+  this.rotation = player.rotation;
   this.game.physics.arcade.enableBody(this);
   this.body.collideWorldBounds = true
+  this.anchor.setTo(.0005, 0.5);
   this.game.time.events.add(2000, this.destroy, this);
+  this.removeExisting();
   this.game.add.existing(this);
+  drops.push(this);
   this.player.bringToTop()
+  window.drop = this;
 };
 
 Drop.prototype = Object.create(Phaser.Sprite.prototype);
@@ -22,7 +28,12 @@ Drop.prototype.update = function() {
 };
 
 Drop.prototype.applyEffect = function(drop, player) {
-  player.body.velocity.y += 400;
+  this.game.physics.arcade.velocityFromAngle(this.angle, 300, this.player.body.velocity);
+}
+Drop.prototype.removeExisting = function() {
+  // if (drops[0]) {
+  //   drops[0].destroy();
+  // }
 }
 
 module.exports = Drop;

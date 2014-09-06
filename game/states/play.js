@@ -19,6 +19,7 @@ Play.prototype = {
     var player = new Player(this.game, 150, 150, 0)
     this.game.add.existing(player);
     this.game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN);
+    window.player = player;
 
     this.game.players = [];
     this.game.players.push(player);
