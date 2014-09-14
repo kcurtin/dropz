@@ -37,7 +37,8 @@ Player.prototype.update = function() {
   this.body.velocity.x = 0;
   this.body.angularVelocity = 0;
 
-  if (this.upKey.isDown ||this.downKey.isDown || this.leftKey.isDown || this.rightKey.isDown) {
+  if (this.upKey.isDown || this.downKey.isDown || this.leftKey.isDown || this.rightKey.isDown) {
+
     if (this.upKey.isDown) {
       this.game.physics.arcade.velocityFromAngle(this.angle, 100, this.body.velocity);
       this.move();
@@ -90,34 +91,34 @@ Player.prototype.dropBelt = function() {
 }
 
 Player.prototype.dropTimeBomb = function() {
-  var shape = this.game.add.graphics(0, 0)
-  shape.lineStyle(2, 0x0000FF, 1);
-  shape.beginFill(0xFFFF0B, 1)
-  shape.drawCircle(this.x, this.y, 100)
-  this.game.time.events.add(2000, shape.destroy, shape);
-  this.game.time.events.add(4000, this.renderTimeBomb, this);
+  // var shape = this.game.add.graphics(0, 0)
+  // shape.lineStyle(2, 0x0000FF, 1);
+  // shape.beginFill(0xFFFF0B, 1)
+  // shape.drawCircle(this.x, this.y, 100)
+  // this.game.time.events.add(2000, shape.destroy, shape);
+  // this.game.time.events.add(4000, this.renderTimeBomb, this);
 
-  this.bringToTop()
+  // this.bringToTop()
 }
 
 Player.prototype.renderTimeBomb = function() {
-  var shape = this.game.add.graphics(0, 0)
-  shape.lineStyle(2, 0x0000FF, 1);
-  shape.beginFill(0xFFFF0B, 1)
-  shape.drawCircle(this.x, this.y, 200);
-  this.game.time.events.add(6000, shape.destroy, shape);
+  // var shape = this.game.add.graphics(0, 0)
+  // shape.lineStyle(2, 0x0000FF, 1);
+  // shape.beginFill(0xFFFF0B, 1)
+  // shape.drawCircle(this.x, this.y, 200);
+  // this.game.time.events.add(6000, shape.destroy, shape);
 
-  this.bringToTop()
+  // this.bringToTop()
 }
 
 Player.prototype.dropCircle = function() {
-  var shape = this.game.add.graphics(0, 0)
-  shape.lineStyle(2, 0x0000FF, 1);
-  shape.beginFill(0xFFFF0B, 1)
-  shape.drawCircle(this.x, this.y, 100)
-  this.game.time.events.add(2000, shape.destroy, shape);
+  // var shape = this.game.add.graphics(0, 0)
+  // shape.lineStyle(2, 0x0000FF, 1);
+  // shape.beginFill(0xFFFF0B, 1)
+  // shape.drawCircle(this.x, this.y, 100)
+  // this.game.time.events.add(2000, shape.destroy, shape);
 
-  this.bringToTop()
+  // this.bringToTop()
 }
 
 Player.prototype.move = function() {

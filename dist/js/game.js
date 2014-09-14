@@ -69,8 +69,6 @@ module.exports = SprenEmitter;
 },{"./spren":5}],3:[function(require,module,exports){
 'use strict';
 
-var drops = [];
-
 var Drop = function(game, player, x, y) {
   var beltBMD = game.add.bitmapData(400, 50);
   beltBMD.fill(191,64,64, 0.8);
@@ -79,30 +77,31 @@ var Drop = function(game, player, x, y) {
   this.player = player;
   this.rotation = player.rotation;
   this.game.physics.arcade.enableBody(this);
-  this.body.collideWorldBounds = true
   this.anchor.setTo(.0005, 0.5);
-  this.game.time.events.add(2000, this.destroy, this);
-  this.removeExisting();
+  this.game.time.events.add(1000, this.destroy, this);
   this.game.add.existing(this);
-  drops.push(this);
   this.player.bringToTop()
-  window.drop = this;
 };
 
 Drop.prototype = Object.create(Phaser.Sprite.prototype);
 Drop.prototype.constructor = Drop;
 
 Drop.prototype.update = function() {
-  this.game.physics.arcade.overlap(this, this.game.players, this.applyEffect, null, this);
+  // this.game.physics.arcade.overlap(this, this.game.players, this.applyEffect, null, this);
+
+  if (this.checkOverlap(this, this.player)){
+    this.applyEffect(this, this.player);
+  }
 };
 
-Drop.prototype.applyEffect = function(drop, player) {
-  this.game.physics.arcade.velocityFromAngle(this.angle, 300, this.player.body.velocity);
+Drop.prototype.checkOverlap = function(spriteA, spriteB) {
+  var boundsA = spriteA.getBounds();
+  var boundsB = spriteB.getBounds();
+  return Phaser.Rectangle.intersects(boundsA, boundsB);
 }
-Drop.prototype.removeExisting = function() {
-  // if (drops[0]) {
-  //   drops[0].destroy();
-  // }
+
+Drop.prototype.applyEffect = function(drop, player) {
+  this.game.physics.arcade.velocityFromAngle(this.angle, 350, player.body.velocity);
 }
 
 module.exports = Drop;
@@ -147,7 +146,8 @@ Player.prototype.update = function() {
   this.body.velocity.x = 0;
   this.body.angularVelocity = 0;
 
-  if (this.upKey.isDown ||this.downKey.isDown || this.leftKey.isDown || this.rightKey.isDown) {
+  if (this.upKey.isDown || this.downKey.isDown || this.leftKey.isDown || this.rightKey.isDown) {
+
     if (this.upKey.isDown) {
       this.game.physics.arcade.velocityFromAngle(this.angle, 100, this.body.velocity);
       this.move();
@@ -200,34 +200,34 @@ Player.prototype.dropBelt = function() {
 }
 
 Player.prototype.dropTimeBomb = function() {
-  var shape = this.game.add.graphics(0, 0)
-  shape.lineStyle(2, 0x0000FF, 1);
-  shape.beginFill(0xFFFF0B, 1)
-  shape.drawCircle(this.x, this.y, 100)
-  this.game.time.events.add(2000, shape.destroy, shape);
-  this.game.time.events.add(4000, this.renderTimeBomb, this);
+  // var shape = this.game.add.graphics(0, 0)
+  // shape.lineStyle(2, 0x0000FF, 1);
+  // shape.beginFill(0xFFFF0B, 1)
+  // shape.drawCircle(this.x, this.y, 100)
+  // this.game.time.events.add(2000, shape.destroy, shape);
+  // this.game.time.events.add(4000, this.renderTimeBomb, this);
 
-  this.bringToTop()
+  // this.bringToTop()
 }
 
 Player.prototype.renderTimeBomb = function() {
-  var shape = this.game.add.graphics(0, 0)
-  shape.lineStyle(2, 0x0000FF, 1);
-  shape.beginFill(0xFFFF0B, 1)
-  shape.drawCircle(this.x, this.y, 200);
-  this.game.time.events.add(6000, shape.destroy, shape);
+  // var shape = this.game.add.graphics(0, 0)
+  // shape.lineStyle(2, 0x0000FF, 1);
+  // shape.beginFill(0xFFFF0B, 1)
+  // shape.drawCircle(this.x, this.y, 200);
+  // this.game.time.events.add(6000, shape.destroy, shape);
 
-  this.bringToTop()
+  // this.bringToTop()
 }
 
 Player.prototype.dropCircle = function() {
-  var shape = this.game.add.graphics(0, 0)
-  shape.lineStyle(2, 0x0000FF, 1);
-  shape.beginFill(0xFFFF0B, 1)
-  shape.drawCircle(this.x, this.y, 100)
-  this.game.time.events.add(2000, shape.destroy, shape);
+  // var shape = this.game.add.graphics(0, 0)
+  // shape.lineStyle(2, 0x0000FF, 1);
+  // shape.beginFill(0xFFFF0B, 1)
+  // shape.drawCircle(this.x, this.y, 100)
+  // this.game.time.events.add(2000, shape.destroy, shape);
 
-  this.bringToTop()
+  // this.bringToTop()
 }
 
 Player.prototype.move = function() {
