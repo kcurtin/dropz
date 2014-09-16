@@ -15,7 +15,7 @@ window.onload = function () {
 
   game.state.start('boot');
 };
-},{"./states/boot":6,"./states/gameover":7,"./states/menu":8,"./states/play":9,"./states/preload":10}],2:[function(require,module,exports){
+},{"./states/boot":8,"./states/gameover":9,"./states/menu":10,"./states/play":11,"./states/preload":12}],2:[function(require,module,exports){
 var Spren = require('./spren');
 
 'use strict';
@@ -66,7 +66,7 @@ SprenEmitter.prototype.updateBitmapDataTexture = function() {
 
 module.exports = SprenEmitter;
 
-},{"./spren":5}],3:[function(require,module,exports){
+},{"./spren":7}],3:[function(require,module,exports){
 'use strict';
 
 var Drop = function(game, player, x, y) {
@@ -107,41 +107,76 @@ Drop.prototype.applyEffect = function(drop, player) {
 module.exports = Drop;
 
 },{}],4:[function(require,module,exports){
+'use strict';
+
+var Enemy = function(game, x, y, frame) {
+  Phaser.Sprite.call(this, game, x, y, 'playerMovements2', frame);
+  this.game.enemies.add(this);
+  this.game.physics.arcade.enableBody(this);
+  this.body.immovable = true;
+  this.body.collideWorldBounds = true;
+  this.anchor.setTo(0.5, 0.5);
+};
+
+Enemy.prototype = Object.create(Phaser.Sprite.prototype);
+Enemy.prototype.constructor = Enemy;
+
+Enemy.prototype.update = function() {
+};
+
+module.exports = Enemy;
+
+},{}],5:[function(require,module,exports){
+'use strict';
+
+var Enemy = require('./enemy');
+
+var enemyGroup = function(game) {
+  Phaser.Group.call(this, game);
+};
+
+enemyGroup.prototype = Object.create(Phaser.Group.prototype);
+enemyGroup.prototype.constructor = enemyGroup;
+
+enemyGroup.prototype.update = function() {
+};
+
+enemyGroup.prototype.addEnemy = function() {
+  new Enemy(this.game, 250, 250, 0);
+};
+
+module.exports = enemyGroup;
+
+},{"./enemy":4}],6:[function(require,module,exports){
 var Drop = require('./drop')
 
 'use strict';
 
 var Player = function(game, x, y, frame) {
   Phaser.Sprite.call(this, game, x, y, 'playerMovements', 0);
-  this.game = game;
   this.game.physics.arcade.enableBody(this);
-  this.body.collideWorldBounds = true
+  this.body.collideWorldBounds = true;
   this.anchor.setTo(0.5, 0.5);
+  this.game.add.existing(this);
 
   this.animations.add('idle', [0], 1, false);
   this.animations.add('walk', [8,9,10,11,12,13,14], 10, true);
   this.animations.add('strafe', [0,1,2,3,4,5,6,7], 10, true);
 
-  this.upKey = game.input.keyboard.addKey(Phaser.Keyboard.E);
-  this.downKey = game.input.keyboard.addKey(Phaser.Keyboard.D);
-  this.leftKey = game.input.keyboard.addKey(Phaser.Keyboard.S);
-  this.rightKey = game.input.keyboard.addKey(Phaser.Keyboard.F);
+  this.mapKeyboardControls();
 
-  this.dropKey = game.input.keyboard.addKey(Phaser.Keyboard.W);
-  this.dropKey2 = game.input.keyboard.addKey(Phaser.Keyboard.R);
-  this.dropKey3 = game.input.keyboard.addKey(Phaser.Keyboard.T);
+  this.game.input.onDown.add(this.anglePlayer, this);
 
-  this.game.input.onDown.add(this.markLocation, this);
-
-  this.dropKey.onDown.add(this.dropCircle, this);
-  this.dropKey2.onDown.add(this.dropBelt, this);
-  this.dropKey3.onDown.add(this.dropTimeBomb, this);
+  this.dropKey.onDown.add(this.dropBelt, this);
+  this.dropKey2.onDown.add(this.particleBurst, this);
 };
 
 Player.prototype = Object.create(Phaser.Sprite.prototype);
 Player.prototype.constructor = Player;
 
 Player.prototype.update = function() {
+  this.game.physics.arcade.collide(this.emitter, this.game.enemies, this.killEnemy, null, this);
+
   this.body.velocity.y = 0;
   this.body.velocity.x = 0;
   this.body.angularVelocity = 0;
@@ -170,64 +205,33 @@ Player.prototype.update = function() {
   } else {
     this.idle();
   }
-
-  // if (this.markedLocationY && this.markedLocationX) {
-  //   if (this.game.physics.arcade.distanceToXY(this, this.markedLocationX, this.markedLocationY) > 8) {
-  //     if (this.game.input.activePointer.isDown) {
-  //       this.game.physics.arcade.accelerateToXY(this, this.markedLocationX, this.markedLocationY, 100, 500, 500);
-  //     } else {
-  //       this.game.physics.arcade.moveToXY(this, this.markedLocationX, this.markedLocationY, 100);
-  //     }
-  //   } else {
-  //     this.body.velocity.setTo(0);
-  //     this.body.acceleration.setTo(0);
-  //     this.idle();
-  //     this.markedLocationY = null;
-  //     this.markedLocationX = null;
-  //   }
-  // }
 };
 
-Player.prototype.markLocation = function(pointer) {
-  this.markedLocationX = pointer.x;
-  this.markedLocationY = pointer.y;
+Player.prototype.anglePlayer = function(pointer) {
   this.rotation = this.game.physics.arcade.angleToPointer(this, pointer);
-  this.move();
 }
 
 Player.prototype.dropBelt = function() {
   new Drop(this.game, this, this.x, this.y);
 }
 
-Player.prototype.dropTimeBomb = function() {
-  // var shape = this.game.add.graphics(0, 0)
-  // shape.lineStyle(2, 0x0000FF, 1);
-  // shape.beginFill(0xFFFF0B, 1)
-  // shape.drawCircle(this.x, this.y, 100)
-  // this.game.time.events.add(2000, shape.destroy, shape);
-  // this.game.time.events.add(4000, this.renderTimeBomb, this);
-
-  // this.bringToTop()
+Player.prototype.particleBurst = function() {
+  var emitter = this.game.add.emitter(this.x, this.y, 100);
+  emitter.makeParticles("corona", [1], 10, true);
+  emitter.minParticleSpeed.setTo(-300, -300);
+  emitter.maxParticleSpeed.setTo(300, 300);
+  emitter.setAlpha(0.3, 0.8);
+  emitter.setScale(0.5, 1);
+  emitter.gravity = 0;
+  this.emitter = emitter;
+  emitter.start(true, 200, null, 10);
 }
 
-Player.prototype.renderTimeBomb = function() {
-  // var shape = this.game.add.graphics(0, 0)
-  // shape.lineStyle(2, 0x0000FF, 1);
-  // shape.beginFill(0xFFFF0B, 1)
-  // shape.drawCircle(this.x, this.y, 200);
-  // this.game.time.events.add(6000, shape.destroy, shape);
-
-  // this.bringToTop()
-}
-
-Player.prototype.dropCircle = function() {
-  // var shape = this.game.add.graphics(0, 0)
-  // shape.lineStyle(2, 0x0000FF, 1);
-  // shape.beginFill(0xFFFF0B, 1)
-  // shape.drawCircle(this.x, this.y, 100)
-  // this.game.time.events.add(2000, shape.destroy, shape);
-
-  // this.bringToTop()
+Player.prototype.killEnemy = function(emitter, enemy) {
+  var coinsSmallSound = this.game.add.audio('coinsSmall');
+  coinsSmallSound.play()
+  enemy.kill();
+  this.game.time.events.add(1000, this.game.enemies.addEnemy, this);
 }
 
 Player.prototype.move = function() {
@@ -242,9 +246,19 @@ Player.prototype.idle = function() {
   this.animations.play("idle");
 }
 
+Player.prototype.mapKeyboardControls = function() {
+  this.upKey    = this.game.input.keyboard.addKey(Phaser.Keyboard.E);
+  this.downKey  = this.game.input.keyboard.addKey(Phaser.Keyboard.D);
+  this.leftKey  = this.game.input.keyboard.addKey(Phaser.Keyboard.S);
+  this.rightKey = this.game.input.keyboard.addKey(Phaser.Keyboard.F);
+
+  this.dropKey  = this.game.input.keyboard.addKey(Phaser.Keyboard.R);
+  this.dropKey2 = this.game.input.keyboard.addKey(Phaser.Keyboard.W);
+}
+
 module.exports = Player;
 
-},{"./drop":3}],5:[function(require,module,exports){
+},{"./drop":3}],7:[function(require,module,exports){
 'use strict';
 
 var Spren = function (game, x, y) {
@@ -263,7 +277,7 @@ Spren.prototype.constructor = Spren;
 
 module.exports = Spren;
 
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
 function Boot() {
@@ -281,7 +295,7 @@ Boot.prototype = {
 
 module.exports = Boot;
 
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 function GameOver() {}
@@ -302,7 +316,7 @@ GameOver.prototype = {
 
 module.exports = GameOver;
 
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 function Menu() {}
@@ -323,10 +337,11 @@ Menu.prototype = {
 
 module.exports = Menu;
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 var Player = require('../prefabs/player');
+var enemyGroup = require('../prefabs/enemyGroup');
 var SprenEmitter = require('../prefabs/SprenEmitter');
 
 function Play() {}
@@ -339,16 +354,16 @@ Play.prototype = {
     this.backGround = this.map.createLayer("Background");
     this.backGround.resizeWorld();
 
-    var emitter = new SprenEmitter(this.game, 200, 200);
+    // var emitter = new SprenEmitter(this.game, 200, 200);
     // this.game.add.existing(emitter);
 
     var player = new Player(this.game, 150, 150, 0)
-    this.game.add.existing(player);
-    this.game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN);
-    window.player = player;
 
-    this.game.players = [];
-    this.game.players.push(player);
+    this.game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN);
+
+    var enemies = new enemyGroup(this.game);
+    this.game.enemies = enemies;
+    enemies.addEnemy();
   },
 
   update: function() {
@@ -361,7 +376,7 @@ Play.prototype = {
 
 module.exports = Play;
 
-},{"../prefabs/SprenEmitter":2,"../prefabs/player":4}],10:[function(require,module,exports){
+},{"../prefabs/SprenEmitter":2,"../prefabs/enemyGroup":5,"../prefabs/player":6}],12:[function(require,module,exports){
 'use strict';
 
 function Preload() {
@@ -374,11 +389,46 @@ Preload.prototype = {
     this.load.tilemap('lvl1', 'assets/wasteland1.json', null, Phaser.Tilemap.TILED_JSON);
     this.load.image("wastelandTiles", "assets/war2-wasteland-tiles.png");
 
+    this.coinsSmall = this.game.load.audio('coinsSmall', 'assets/coins_small.ogg');
+    this.coinsBig =   this.game.load.audio('coinsBig', 'assets/coins_big.ogg');
+
+    this.load.image('corona', 'assets/blue.png');
+
     this.load.spritesheet('playerMovements', 'assets/playerMovements2.png', 64, 64, 16);
+    this.load.spritesheet('playerMovements2', 'assets/playerMovements2.png', 64, 64, 16);
+
+    this.loadPlayers()
+    this.loadEnemies()
+
     this.onLoadComplete()
   },
 
   create: function() {
+  },
+
+  loadPlayers: function() {
+    this.load.spritesheet("player-cast-forward", "assets/players/player-cast-forward.png");
+    this.load.spritesheet("player-cast-onehand", "assets/players/player-cast-onehand.png");
+    this.load.spritesheet("player-cast", "assets/players/player-cast.png");
+    this.load.spritesheet("player-die", "assets/players/player-die.png");
+    this.load.spritesheet("player-move", "assets/players/player-move.png");
+    this.load.spritesheet("player-strafe", "assets/players/player-strafe.png");
+    this.load.spritesheet("player-wobble", "assets/players/player-wobble.png");
+    this.load.spritesheet("player2-cast-forward", "assets/players/player2-cast-forward.png");
+    this.load.spritesheet("player2-cast-onehand", "assets/players/player2-cast-onehand.png");
+    this.load.spritesheet("player2-cast", "assets/players/player2-cast.png");
+    this.load.spritesheet("player2-die", "assets/players/player2-die.png");
+    this.load.spritesheet("player2-move", "assets/players/player2-move.png");
+    this.load.spritesheet("player2-wobble", "assets/players/player2-wobble.png");
+    this.load.spritesheet("player2-strafe_0", "assets/players/player2-strafe_0.png");
+  },
+
+  loadEnemies: function() {
+    this.load.spritesheet("troll-attack-wounded", "assets/enemies/troll-attack-wounded.png");
+    this.load.spritesheet("troll-attack", "assets/enemies/troll-attack.png");
+    this.load.spritesheet("troll-death", "assets/enemies/troll-death.png");
+    this.load.spritesheet("troll-move-wounded", "assets/enemies/troll-move-wounded.png");
+    this.load.spritesheet("troll-move", "assets/enemies/troll-move.png");
   },
 
   update: function() {
