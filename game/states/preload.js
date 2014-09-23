@@ -38,18 +38,18 @@ Preload.prototype = {
     this.load.spritesheet("player2-cast-forward", "assets/players/player2-cast-forward.png");
     this.load.spritesheet("player2-cast-onehand", "assets/players/player2-cast-onehand.png");
     this.load.spritesheet("player2-cast", "assets/players/player2-cast.png");
-    this.load.spritesheet("player2-die", "assets/players/player2-die.png");
-    this.load.spritesheet("player2-move", "assets/players/player2-move.png");
+    this.load.spritesheet("player2-die", "assets/players/player2-die.png", 64, 64, 8);
+    this.load.spritesheet("player2-move", "assets/players/player2-move.png", 64, 64, 8);
     this.load.spritesheet("player2-wobble", "assets/players/player2-wobble.png");
     this.load.spritesheet("player2-strafe_0", "assets/players/player2-strafe_0.png");
   },
 
   loadEnemies: function() {
-    this.load.spritesheet("troll-attack-wounded", "assets/enemies/troll-attack-wounded.png");
-    this.load.spritesheet("troll-attack", "assets/enemies/troll-attack.png");
-    this.load.spritesheet("troll-death", "assets/enemies/troll-death.png");
-    this.load.spritesheet("troll-move-wounded", "assets/enemies/troll-move-wounded.png");
-    this.load.spritesheet("troll-move", "assets/enemies/troll-move.png");
+    this.load.spritesheet("troll-attack-wounded", "assets/enemies/troll/troll-attack-wounded.png");
+    this.load.spritesheet("troll-attack", "assets/enemies/troll/troll-attack.png");
+    this.load.spritesheet("troll-death", "assets/enemies/troll/troll-death.png");
+    this.load.spritesheet("troll-move-wounded", "assets/enemies/troll/troll-move-wounded.png");
+    this.load.spritesheet("troll-move", "assets/enemies/troll/troll-move.png");
   },
 
   update: function() {

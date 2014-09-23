@@ -1,7 +1,7 @@
 'use strict';
 
 var Enemy = function(game, x, y, frame) {
-  Phaser.Sprite.call(this, game, x, y, 'playerMovements2', frame);
+  Phaser.Sprite.call(this, game, x, y, 'player2-move', 0);
   this.game.enemies.add(this);
   this.game.physics.arcade.enableBody(this);
   this.body.immovable = true;

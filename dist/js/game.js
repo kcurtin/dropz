@@ -110,7 +110,7 @@ module.exports = Drop;
 'use strict';
 
 var Enemy = function(game, x, y, frame) {
-  Phaser.Sprite.call(this, game, x, y, 'playerMovements2', frame);
+  Phaser.Sprite.call(this, game, x, y, 'player2-move', 0);
   this.game.enemies.add(this);
   this.game.physics.arcade.enableBody(this);
   this.body.immovable = true;
@@ -144,6 +144,17 @@ enemyGroup.prototype.update = function() {
 enemyGroup.prototype.addEnemy = function() {
   new Enemy(this.game, 250, 250, 0);
 };
+
+enemyGroup.prototype.killEnemy = function(emitter, enemy) {
+  var coinsSmallSound = this.game.add.audio('coinsSmall');
+  coinsSmallSound.play()
+  enemy.kill();
+  var character = this.game.add.sprite(enemy.x, enemy.y, 'player2-die');
+  character.animations.add('die', [0,1,2,3,4,5,6,7], 10, false);
+  character.animations.play("die");
+  // this.game.time.events.add(1000, this.game.enemies.addEnemy, this);
+}
+
 
 module.exports = enemyGroup;
 
@@ -217,20 +228,26 @@ Player.prototype.dropBelt = function() {
 
 Player.prototype.particleBurst = function() {
   var emitter = this.game.add.emitter(this.x, this.y, 100);
-  emitter.makeParticles("corona", [1], 10, true);
-  emitter.minParticleSpeed.setTo(-300, -300);
-  emitter.maxParticleSpeed.setTo(300, 300);
-  emitter.setAlpha(0.3, 0.8);
-  emitter.setScale(0.5, 1);
-  emitter.gravity = 0;
+  emitter.makeParticles("corona", [0], 10, true, false);
+  emitter.minRotation = 0;
+  emitter.maxRotation = 0;
+  // emitter.minParticleSpeed.setTo(-300, -300);
+  // emitter.maxParticleSpeed.setTo(300, 300);
+  // emitter.setAlpha(0.3, 0.8);
+  // emitter.setScale(0.5, 1);
+  // emitter.gravity = 0;
   this.emitter = emitter;
   emitter.start(true, 200, null, 10);
+  this.bringToTop();
 }
 
 Player.prototype.killEnemy = function(emitter, enemy) {
   var coinsSmallSound = this.game.add.audio('coinsSmall');
   coinsSmallSound.play()
   enemy.kill();
+  var character = this.game.add.sprite(enemy.x, enemy.y, 'player2-die');
+  character.animations.add('die', [0,1,2,3,4,5,6,7], 10, false);
+  character.animations.play("die");
   this.game.time.events.add(1000, this.game.enemies.addEnemy, this);
 }
 
@@ -417,18 +434,18 @@ Preload.prototype = {
     this.load.spritesheet("player2-cast-forward", "assets/players/player2-cast-forward.png");
     this.load.spritesheet("player2-cast-onehand", "assets/players/player2-cast-onehand.png");
     this.load.spritesheet("player2-cast", "assets/players/player2-cast.png");
-    this.load.spritesheet("player2-die", "assets/players/player2-die.png");
-    this.load.spritesheet("player2-move", "assets/players/player2-move.png");
+    this.load.spritesheet("player2-die", "assets/players/player2-die.png", 64, 64, 8);
+    this.load.spritesheet("player2-move", "assets/players/player2-move.png", 64, 64, 8);
     this.load.spritesheet("player2-wobble", "assets/players/player2-wobble.png");
     this.load.spritesheet("player2-strafe_0", "assets/players/player2-strafe_0.png");
   },
 
   loadEnemies: function() {
-    this.load.spritesheet("troll-attack-wounded", "assets/enemies/troll-attack-wounded.png");
-    this.load.spritesheet("troll-attack", "assets/enemies/troll-attack.png");
-    this.load.spritesheet("troll-death", "assets/enemies/troll-death.png");
-    this.load.spritesheet("troll-move-wounded", "assets/enemies/troll-move-wounded.png");
-    this.load.spritesheet("troll-move", "assets/enemies/troll-move.png");
+    this.load.spritesheet("troll-attack-wounded", "assets/enemies/troll/troll-attack-wounded.png");
+    this.load.spritesheet("troll-attack", "assets/enemies/troll/troll-attack.png");
+    this.load.spritesheet("troll-death", "assets/enemies/troll/troll-death.png");
+    this.load.spritesheet("troll-move-wounded", "assets/enemies/troll/troll-move-wounded.png");
+    this.load.spritesheet("troll-move", "assets/enemies/troll/troll-move.png");
   },
 
   update: function() {
