@@ -16,57 +16,6 @@ window.onload = function () {
   game.state.start('boot');
 };
 },{"./states/boot":8,"./states/gameover":9,"./states/menu":10,"./states/play":11,"./states/preload":12}],2:[function(require,module,exports){
-var Spren = require('./spren');
-
-'use strict';
-
-var SprenEmitter = function(game, x, y, frame) {
-  Phaser.Particles.Arcade.Emitter.call(this, game, x, y);
-  this.width = 800;
-  this.particleClass = Spren;
-  this.makeParticles();
-  this.minParticleSpeed.set(0, 300);
-  this.maxParticleSpeed.set(0, 400);
-  this.setRotation(0, 0);
-  this.setScale(0.1, 1, 0.1, 1, 12000, Phaser.Easing.Quintic.Out);
-  this.gravity = -200;
-  this.game.input.onDown.add(this.emitParticles, this);
-  this.game.input.onUp.add(this.stopParticles, this);
-};
-
-SprenEmitter.prototype = Object.create(Phaser.Particles.Arcade.Emitter.prototype);
-SprenEmitter.prototype.constructor = SprenEmitter;
-
-SprenEmitter.prototype.emitParticles = function(pointer) {
-  this.x = pointer.x;
-  this.y = pointer.y;
-  this.start(false, 5000, 100);
-}
-
-SprenEmitter.prototype.stopParticles = function() {
-  this.on = false;
-}
-
-SprenEmitter.prototype.updateBitmapDataTexture = function() {
-  var bmd = this.game.cache.getBitmapData('particleShade');
-  bmd.context.clearRect(0, 0, 64, 64);
-
-  var radgrad = bmd.ctx.createRadialGradient(32, 32, 4, 32, 32, 32);
-  var c = Phaser.Color.getRGB(Phaser.Color.getRandomColor(0, 255, 255));
-
-  radgrad.addColorStop(0, Phaser.Color.getWebRGB(c));
-  c.a = 0;
-  radgrad.addColorStop(1, Phaser.Color.getWebRGB(c));
-
-  bmd.context.fillStyle = radgrad;
-  bmd.context.fillRect(0, 0, 64, 64);
-
-  bmd.dirty = true;
-}
-
-module.exports = SprenEmitter;
-
-},{"./spren":7}],3:[function(require,module,exports){
 'use strict';
 
 var Drop = function(game, player, x, y) {
@@ -106,7 +55,7 @@ Drop.prototype.applyEffect = function(drop, player) {
 
 module.exports = Drop;
 
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 'use strict';
 
 var Enemy = function(game, x, y, frame) {
@@ -116,6 +65,22 @@ var Enemy = function(game, x, y, frame) {
   this.body.immovable = true;
   this.body.collideWorldBounds = true;
   this.anchor.setTo(0.5, 0.5);
+
+  // this.hp = 20;
+  // this.totalhp = 20;
+  // this._lasthp = 0;
+  // this.healthbar = game.add.graphics(0,0);
+  // var x = (this.hp / this.totalhp) * 100;
+  // var colour = this.rgbToHex((x > 50 ? 1-2*(x-50)/100.0 : 1.0) * 255, (x > 50 ? 1.0 : 2*x/100.0) * 255, 0);
+  // var colour = this.rgbToHex((x > 50 ? 1-2*(x-50)/100.0 : 1.0) * 255, (x > 50 ? 1.0 : 2*x/100.0) * 255, 0);
+  // this.healthbar.beginFill(colour);
+  // this.healthbar.lineStyle(5, colour, 1);
+  // this.healthbar.moveTo(0,-5);
+  // this.healthbar.lineTo(64 * this.hp / this.totalhp, -5);
+  // this.healthbar.endFill();
+  // Enemy.prototype.rgbToHex = function (r, g, b) {
+  //   return "0x" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  // }
 };
 
 Enemy.prototype = Object.create(Phaser.Sprite.prototype);
@@ -124,9 +89,22 @@ Enemy.prototype.constructor = Enemy;
 Enemy.prototype.update = function() {
 };
 
+Enemy.prototype.damageHandler = function () {
+  var coinsSmallSound = this.game.add.audio('coinsSmall');
+  coinsSmallSound.play()
+  var character = this.game.add.sprite(this.x, this.y, 'player2-die');
+  character.animations.add('die', [0,1,2,3,4,5,6,7], 10, false);
+  this.kill();
+  character.animations.play("die");
+  this.game.time.events.add(1000, this.game.enemies.addEnemy, this);
+}
+
+Enemy.prototype.deathHandler = function () {
+}
+
 module.exports = Enemy;
 
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 var Enemy = require('./enemy');
@@ -158,8 +136,9 @@ enemyGroup.prototype.killEnemy = function(emitter, enemy) {
 
 module.exports = enemyGroup;
 
-},{"./enemy":4}],6:[function(require,module,exports){
+},{"./enemy":3}],5:[function(require,module,exports){
 var Drop = require('./drop')
+var sprenEmitter = require('../prefabs/sprenEmitter');
 
 'use strict';
 
@@ -175,18 +154,13 @@ var Player = function(game, x, y, frame) {
   this.animations.add('strafe', [0,1,2,3,4,5,6,7], 10, true);
 
   this.mapKeyboardControls();
-
-  this.game.input.onDown.add(this.anglePlayer, this);
-
-  this.dropKey.onDown.add(this.dropBelt, this);
-  this.dropKey2.onDown.add(this.particleBurst, this);
 };
 
 Player.prototype = Object.create(Phaser.Sprite.prototype);
 Player.prototype.constructor = Player;
 
 Player.prototype.update = function() {
-  this.game.physics.arcade.collide(this.emitter, this.game.enemies, this.killEnemy, null, this);
+  this.game.physics.arcade.collide(this.emitter, this.game.enemies, this.dealDamage, null, this);
 
   this.body.velocity.y = 0;
   this.body.velocity.x = 0;
@@ -213,6 +187,7 @@ Player.prototype.update = function() {
       this.body.angularVelocity = 425;
       this.strafe();
     }
+
   } else {
     this.idle();
   }
@@ -227,28 +202,12 @@ Player.prototype.dropBelt = function() {
 }
 
 Player.prototype.particleBurst = function() {
-  var emitter = this.game.add.emitter(this.x, this.y, 100);
-  emitter.makeParticles("corona", [0], 10, true, false);
-  emitter.minRotation = 0;
-  emitter.maxRotation = 0;
-  // emitter.minParticleSpeed.setTo(-300, -300);
-  // emitter.maxParticleSpeed.setTo(300, 300);
-  // emitter.setAlpha(0.3, 0.8);
-  // emitter.setScale(0.5, 1);
-  // emitter.gravity = 0;
-  this.emitter = emitter;
-  emitter.start(true, 200, null, 10);
+  this.emitter = new sprenEmitter(this.game, this.x, this.y, 100);
   this.bringToTop();
 }
 
-Player.prototype.killEnemy = function(emitter, enemy) {
-  var coinsSmallSound = this.game.add.audio('coinsSmall');
-  coinsSmallSound.play()
-  enemy.kill();
-  var character = this.game.add.sprite(enemy.x, enemy.y, 'player2-die');
-  character.animations.add('die', [0,1,2,3,4,5,6,7], 10, false);
-  character.animations.play("die");
-  this.game.time.events.add(1000, this.game.enemies.addEnemy, this);
+Player.prototype.dealDamage = function(emitter, enemy) {
+  enemy.damageHandler()
 }
 
 Player.prototype.move = function() {
@@ -271,22 +230,19 @@ Player.prototype.mapKeyboardControls = function() {
 
   this.dropKey  = this.game.input.keyboard.addKey(Phaser.Keyboard.R);
   this.dropKey2 = this.game.input.keyboard.addKey(Phaser.Keyboard.W);
+
+  this.game.input.onDown.add(this.anglePlayer, this);
+  this.dropKey.onDown.add(this.dropBelt, this);
+  this.dropKey2.onDown.add(this.particleBurst, this);
 }
 
 module.exports = Player;
 
-},{"./drop":3}],7:[function(require,module,exports){
+},{"../prefabs/sprenEmitter":7,"./drop":2}],6:[function(require,module,exports){
 'use strict';
 
 var Spren = function (game, x, y) {
-  var bmd = game.add.bitmapData(64, 64);
-  var radgrad = bmd.ctx.createRadialGradient(32, 32, 4, 32, 32, 32);
-  radgrad.addColorStop(0, 'rgba(1, 159, 98, 1)');
-  radgrad.addColorStop(1, 'rgba(1, 159, 98, 0)');
-  bmd.context.fillStyle = radgrad;
-  bmd.context.fillRect(0, 0, 64, 64);
-  game.cache.addBitmapData('particleShade', bmd);
-  Phaser.Particle.call(this, game, x, y, game.cache.getBitmapData('particleShade'));
+  Phaser.Particle.call(this, game, x, y, "corona");
 };
 
 Spren.prototype = Object.create(Phaser.Particle.prototype);
@@ -294,7 +250,27 @@ Spren.prototype.constructor = Spren;
 
 module.exports = Spren;
 
-},{}],8:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
+var Spren = require('./spren');
+
+'use strict';
+
+var sprenEmitter = function(game, x, y) {
+  Phaser.Particles.Arcade.Emitter.call(this, game, x, y, 100);
+  this.game.add.existing(this);
+  this.particleClass = Spren;
+  this.makeParticles();
+  this.minRotation = 0;
+  this.maxRotation = 0;
+  this.start(true, 200, null, 10);
+};
+
+sprenEmitter.prototype = Object.create(Phaser.Particles.Arcade.Emitter.prototype);
+sprenEmitter.prototype.constructor = sprenEmitter;
+
+module.exports = sprenEmitter;
+
+},{"./spren":6}],8:[function(require,module,exports){
 'use strict';
 
 function Boot() {
@@ -359,7 +335,6 @@ module.exports = Menu;
 
 var Player = require('../prefabs/player');
 var enemyGroup = require('../prefabs/enemyGroup');
-var SprenEmitter = require('../prefabs/SprenEmitter');
 
 function Play() {}
 Play.prototype = {
@@ -370,9 +345,6 @@ Play.prototype = {
     this.map.addTilesetImage("war2-wasteland-tiles", 'wastelandTiles');
     this.backGround = this.map.createLayer("Background");
     this.backGround.resizeWorld();
-
-    // var emitter = new SprenEmitter(this.game, 200, 200);
-    // this.game.add.existing(emitter);
 
     var player = new Player(this.game, 150, 150, 0)
 
@@ -393,7 +365,7 @@ Play.prototype = {
 
 module.exports = Play;
 
-},{"../prefabs/SprenEmitter":2,"../prefabs/enemyGroup":5,"../prefabs/player":6}],12:[function(require,module,exports){
+},{"../prefabs/enemyGroup":4,"../prefabs/player":5}],12:[function(require,module,exports){
 'use strict';
 
 function Preload() {

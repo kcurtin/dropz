@@ -2,7 +2,6 @@
 
 var Player = require('../prefabs/player');
 var enemyGroup = require('../prefabs/enemyGroup');
-var SprenEmitter = require('../prefabs/SprenEmitter');
 
 function Play() {}
 Play.prototype = {
@@ -13,9 +12,6 @@ Play.prototype = {
     this.map.addTilesetImage("war2-wasteland-tiles", 'wastelandTiles');
     this.backGround = this.map.createLayer("Background");
     this.backGround.resizeWorld();
-
-    // var emitter = new SprenEmitter(this.game, 200, 200);
-    // this.game.add.existing(emitter);
 
     var player = new Player(this.game, 150, 150, 0)
 
