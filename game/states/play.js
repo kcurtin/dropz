@@ -1,7 +1,7 @@
 'use strict';
 
 var Player = require('../prefabs/player');
-var enemyGroup = require('../prefabs/enemyGroup');
+var EnemyGroup = require('../prefabs/EnemyGroup');
 
 function Play() {}
 Play.prototype = {
@@ -17,7 +17,7 @@ Play.prototype = {
 
     this.game.camera.follow(player, Phaser.Camera.FOLLOW_TOPDOWN);
 
-    var enemies = new enemyGroup(this.game);
+    var enemies = new EnemyGroup(this.game);
     this.game.enemies = enemies;
     enemies.addEnemy();
   },

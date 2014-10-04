@@ -1,5 +1,5 @@
 var Drop = require('./drop')
-var sprenEmitter = require('../prefabs/sprenEmitter');
+var SprenEmitter = require('../prefabs/SprenEmitter');
 
 'use strict';
 
@@ -63,7 +63,7 @@ Player.prototype.dropBelt = function() {
 }
 
 Player.prototype.particleBurst = function() {
-  this.emitter = new sprenEmitter(this.game, this.x, this.y, 100);
+  this.emitter = new SprenEmitter(this.game, this.x, this.y, 100);
   this.bringToTop();
 }
 

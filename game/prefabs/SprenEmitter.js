@@ -2,7 +2,7 @@ var Spren = require('./spren');
 
 'use strict';
 
-var sprenEmitter = function(game, x, y) {
+var SprenEmitter = function(game, x, y) {
   Phaser.Particles.Arcade.Emitter.call(this, game, x, y, 100);
   this.game.add.existing(this);
   this.particleClass = Spren;
@@ -12,7 +12,7 @@ var sprenEmitter = function(game, x, y) {
   this.start(true, 200, null, 10);
 };
 
-sprenEmitter.prototype = Object.create(Phaser.Particles.Arcade.Emitter.prototype);
-sprenEmitter.prototype.constructor = sprenEmitter;
+SprenEmitter.prototype = Object.create(Phaser.Particles.Arcade.Emitter.prototype);
+SprenEmitter.prototype.constructor = SprenEmitter;
 
-module.exports = sprenEmitter;
+module.exports = SprenEmitter;

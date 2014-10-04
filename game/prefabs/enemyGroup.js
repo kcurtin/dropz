@@ -2,21 +2,21 @@
 
 var Enemy = require('./enemy');
 
-var enemyGroup = function(game) {
+var EnemyGroup = function(game) {
   Phaser.Group.call(this, game);
 };
 
-enemyGroup.prototype = Object.create(Phaser.Group.prototype);
-enemyGroup.prototype.constructor = enemyGroup;
+EnemyGroup.prototype = Object.create(Phaser.Group.prototype);
+EnemyGroup.prototype.constructor = EnemyGroup;
 
-enemyGroup.prototype.update = function() {
+EnemyGroup.prototype.update = function() {
 };
 
-enemyGroup.prototype.addEnemy = function() {
+EnemyGroup.prototype.addEnemy = function() {
   new Enemy(this.game, 250, 250, 0);
 };
 
-enemyGroup.prototype.killEnemy = function(emitter, enemy) {
+EnemyGroup.prototype.killEnemy = function(emitter, enemy) {
   var coinsSmallSound = this.game.add.audio('coinsSmall');
   coinsSmallSound.play()
   enemy.kill();
@@ -27,4 +27,4 @@ enemyGroup.prototype.killEnemy = function(emitter, enemy) {
 }
 
 
-module.exports = enemyGroup;
+module.exports = EnemyGroup;
