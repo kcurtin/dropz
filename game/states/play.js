@@ -19,7 +19,7 @@ Play.prototype = {
 
     var enemies = new EnemyGroup(this.game);
     this.game.enemies = enemies;
-    enemies.addEnemy();
+    enemies.addRandEnemies(10);
   },
 
   update: function() {

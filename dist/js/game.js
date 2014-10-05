@@ -15,7 +15,7 @@ window.onload = function () {
 
   game.state.start('boot');
 };
-},{"./states/boot":8,"./states/gameover":9,"./states/menu":10,"./states/play":11,"./states/preload":12}],2:[function(require,module,exports){
+},{"./states/boot":10,"./states/gameover":11,"./states/menu":12,"./states/play":13,"./states/preload":14}],2:[function(require,module,exports){
 'use strict';
 
 var Enemy = require('./enemy');
@@ -34,6 +34,14 @@ EnemyGroup.prototype.addEnemy = function() {
   new Enemy(this.game, 250, 250, 0);
 };
 
+EnemyGroup.prototype.addRandEnemies = function(num) {
+  for (var i = 0; i < num; i++) {
+    var x = this.game.rnd.integerInRange(100, 770);
+    var y = this.game.rnd.integerInRange(0, 570);
+    new Enemy(this.game, x, y, 0);
+  }
+};
+
 EnemyGroup.prototype.killEnemy = function(emitter, enemy) {
   var coinsSmallSound = this.game.add.audio('coinsSmall');
   coinsSmallSound.play()
@@ -47,13 +55,62 @@ EnemyGroup.prototype.killEnemy = function(emitter, enemy) {
 
 module.exports = EnemyGroup;
 
-},{"./enemy":5}],3:[function(require,module,exports){
+},{"./enemy":6}],3:[function(require,module,exports){
+'use strict';
+
+var HealthBar = function(game, x, y, width, height, max, player) {
+  this.max = max;
+  this.backgroundColor = '#999';
+  this.player = player;
+  this.bmd = game.add.bitmapData(player.width, 5);
+
+  Phaser.Sprite.call(this, game, x, y, this.bmd);
+  this.updateHealth();
+};
+
+HealthBar.prototype = Object.create(Phaser.Sprite.prototype);
+HealthBar.prototype.constructor = HealthBar;
+
+HealthBar.prototype.update = function() {
+};
+
+HealthBar.prototype.updateHealth = function() {
+  var percent = this.player.health / this.max;
+  this.bmd.clear();
+  this.bmd.ctx.beginPath();
+  this.bmd.ctx.moveTo(0,0);
+  this.bmd.ctx.rect(0,0, this.player.width, 5);
+  this.bmd.ctx.closePath();
+  this.bmd.ctx.fillStyle = this.backgroundColor;
+  this.bmd.ctx.fill();
+  this.bmd.ctx.beginPath();
+  this.bmd.ctx.rect(0,0, this.player.width*percent, 5);
+  this.bmd.ctx.fillStyle = this.colorBar(percent);
+  this.bmd.ctx.fill();
+  this.bmd.ctx.closePath();
+  this.bmd.render();
+  this.bmd.refreshBuffer();
+}
+
+HealthBar.prototype.colorBar = function(percent) {
+  if (percent <= 0.25) {
+    return '#ff7474'; //red
+  }
+  if (percent <= 0.75) {
+    return '#eaff74'; //yellow
+  }
+  return '#74ff74'; //green
+}
+
+module.exports = HealthBar;
+
+},{}],4:[function(require,module,exports){
 var Spren = require('./spren');
 
 'use strict';
 
-var SprenEmitter = function(game, x, y) {
-  Phaser.Particles.Arcade.Emitter.call(this, game, x, y, 100);
+var SprenEmitter = function(game, x, y, sprenCount) {
+  Phaser.Particles.Arcade.Emitter.call(this, game, x, y, sprenCount);
   this.game.add.existing(this);
   this.particleClass = Spren;
   this.makeParticles();
@@ -67,7 +124,7 @@ SprenEmitter.prototype.constructor = SprenEmitter;
 
 module.exports = SprenEmitter;
 
-},{"./spren":7}],4:[function(require,module,exports){
+},{"./spren":9}],5:[function(require,module,exports){
 'use strict';
 
 var Drop = function(game, player, x, y) {
@@ -107,32 +164,25 @@ Drop.prototype.applyEffect = function(drop, player) {
 
 module.exports = Drop;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
+
+var HealthBar = require("./HealthBar");
 
 var Enemy = function(game, x, y, frame) {
   Phaser.Sprite.call(this, game, x, y, 'player2-move', 0);
+  this.maxHealth = 100;
   this.game.enemies.add(this);
   this.game.physics.arcade.enableBody(this);
   this.body.immovable = true;
   this.body.collideWorldBounds = true;
   this.anchor.setTo(0.5, 0.5);
+  this.events.onKilled.add(this.deathHandler);
+  this.health = 100;
 
-  // this.hp = 20;
-  // this.totalhp = 20;
-  // this._lasthp = 0;
-  // this.healthbar = game.add.graphics(0,0);
-  // var x = (this.hp / this.totalhp) * 100;
-  // var colour = this.rgbToHex((x > 50 ? 1-2*(x-50)/100.0 : 1.0) * 255, (x > 50 ? 1.0 : 2*x/100.0) * 255, 0);
-  // var colour = this.rgbToHex((x > 50 ? 1-2*(x-50)/100.0 : 1.0) * 255, (x > 50 ? 1.0 : 2*x/100.0) * 255, 0);
-  // this.healthbar.beginFill(colour);
-  // this.healthbar.lineStyle(5, colour, 1);
-  // this.healthbar.moveTo(0,-5);
-  // this.healthbar.lineTo(64 * this.hp / this.totalhp, -5);
-  // this.healthbar.endFill();
-  // Enemy.prototype.rgbToHex = function (r, g, b) {
-  //   return "0x" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-  // }
+  this.healthBar = new HealthBar(game, 0, -20, 64, 4, this.maxHealth, this);
+  this.healthBar.anchor.setTo(0.5, 0.5);
+  this.addChild(this.healthBar);
 };
 
 Enemy.prototype = Object.create(Phaser.Sprite.prototype);
@@ -141,23 +191,25 @@ Enemy.prototype.constructor = Enemy;
 Enemy.prototype.update = function() {
 };
 
-Enemy.prototype.damageHandler = function () {
-  var coinsSmallSound = this.game.add.audio('coinsSmall');
-  coinsSmallSound.play()
-  var character = this.game.add.sprite(this.x, this.y, 'player2-die');
-  character.animations.add('die', [0,1,2,3,4,5,6,7], 10, false);
-  this.kill();
-  character.animations.play("die");
-  this.game.time.events.add(1000, this.game.enemies.addEnemy, this);
+Enemy.prototype.damageHandler = function (dmg) {
+  this.damage(dmg);
+  this.healthBar.updateHealth();
 }
 
-Enemy.prototype.deathHandler = function () {
+Enemy.prototype.deathHandler = function (enemy) {
+  var coinsSmallSound = enemy.game.add.audio('coinsSmall');
+  coinsSmallSound.play()
+  var character = enemy.game.add.sprite(enemy.x, enemy.y, 'player2-die');
+  character.animations.add('die', [0,1,2,3,4,5,6,7], 10, false);
+  character.animations.play("die");
+  // enemy.game.time.events.add(1000, enemy.game.enemies.addEnemy, enemy);
 }
 
 module.exports = Enemy;
 
-},{}],6:[function(require,module,exports){
+},{"./HealthBar":3}],7:[function(require,module,exports){
 var Drop = require('./drop')
+var Spell = require('./spell')
 var SprenEmitter = require('../prefabs/SprenEmitter');
 
 'use strict';
@@ -180,8 +232,6 @@ Player.prototype = Object.create(Phaser.Sprite.prototype);
 Player.prototype.constructor = Player;
 
 Player.prototype.update = function() {
-  this.game.physics.arcade.collide(this.emitter, this.game.enemies, this.dealDamage, null, this);
-
   this.body.velocity.y = 0;
   this.body.velocity.x = 0;
   this.body.angularVelocity = 0;
@@ -222,12 +272,9 @@ Player.prototype.dropBelt = function() {
 }
 
 Player.prototype.particleBurst = function() {
-  this.emitter = new SprenEmitter(this.game, this.x, this.y, 100);
+  // this.spell = new SprenEmitter(this.game, this.x, this.y, 1);
+  this.spell = new Spell(this.game, this.x - this.width, this.y - this.height, 'corona');
   this.bringToTop();
-}
-
-Player.prototype.dealDamage = function(emitter, enemy) {
-  enemy.damageHandler()
 }
 
 Player.prototype.move = function() {
@@ -258,7 +305,39 @@ Player.prototype.mapKeyboardControls = function() {
 
 module.exports = Player;
 
-},{"../prefabs/SprenEmitter":3,"./drop":4}],7:[function(require,module,exports){
+},{"../prefabs/SprenEmitter":4,"./drop":5,"./spell":8}],8:[function(require,module,exports){
+'use strict';
+
+var Spell = function(game, x, y, key) {
+  Phaser.Sprite.call(this, game, x, y, key);
+  game.physics.enable(this, Phaser.Physics.ARCADE);
+  this.enableBody = true;
+  this.active = true;
+  this.damageAmount = 25;
+  game.add.existing(this);
+  this.game.time.events.add(500, this.kill, this);
+};
+
+Spell.prototype = Object.create(Phaser.Sprite.prototype);
+Spell.prototype.constructor = Spell;
+
+Spell.prototype.update = function() {
+  // this.game.physics.arcade.collide(this.spell, this.game.enemies, this.dealDamage, null, this);
+  this.game.physics.arcade.overlap(this, this.game.enemies, this.dealDamage, null, this);
+
+};
+
+Spell.prototype.dealDamage = function(spell, enemy) {
+  if (spell.active) {
+    enemy.damageHandler(spell.damageAmount);
+  }
+  spell.active = false;
+}
+
+
+module.exports = Spell;
+
+},{}],9:[function(require,module,exports){
 'use strict';
 
 var Spren = function (game, x, y) {
@@ -270,7 +349,7 @@ Spren.prototype.constructor = Spren;
 
 module.exports = Spren;
 
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 function Boot() {
@@ -288,7 +367,7 @@ Boot.prototype = {
 
 module.exports = Boot;
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 function GameOver() {}
@@ -309,7 +388,7 @@ GameOver.prototype = {
 
 module.exports = GameOver;
 
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 function Menu() {}
@@ -330,7 +409,7 @@ Menu.prototype = {
 
 module.exports = Menu;
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var Player = require('../prefabs/player');
@@ -352,7 +431,7 @@ Play.prototype = {
 
     var enemies = new EnemyGroup(this.game);
     this.game.enemies = enemies;
-    enemies.addEnemy();
+    enemies.addRandEnemies(10);
   },
 
   update: function() {
@@ -365,7 +444,7 @@ Play.prototype = {
 
 module.exports = Play;
 
-},{"../prefabs/EnemyGroup":2,"../prefabs/player":6}],12:[function(require,module,exports){
+},{"../prefabs/EnemyGroup":2,"../prefabs/player":7}],14:[function(require,module,exports){
 'use strict';
 
 function Preload() {

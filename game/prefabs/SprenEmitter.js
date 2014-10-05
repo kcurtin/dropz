@@ -2,8 +2,8 @@ var Spren = require('./spren');
 
 'use strict';
 
-var SprenEmitter = function(game, x, y) {
-  Phaser.Particles.Arcade.Emitter.call(this, game, x, y, 100);
+var SprenEmitter = function(game, x, y, sprenCount) {
+  Phaser.Particles.Arcade.Emitter.call(this, game, x, y, sprenCount);
   this.game.add.existing(this);
   this.particleClass = Spren;
   this.makeParticles();

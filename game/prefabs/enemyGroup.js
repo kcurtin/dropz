@@ -16,6 +16,14 @@ EnemyGroup.prototype.addEnemy = function() {
   new Enemy(this.game, 250, 250, 0);
 };
 
+EnemyGroup.prototype.addRandEnemies = function(num) {
+  for (var i = 0; i < num; i++) {
+    var x = this.game.rnd.integerInRange(100, 770);
+    var y = this.game.rnd.integerInRange(0, 570);
+    new Enemy(this.game, x, y, 0);
+  }
+};
+
 EnemyGroup.prototype.killEnemy = function(emitter, enemy) {
   var coinsSmallSound = this.game.add.audio('coinsSmall');
   coinsSmallSound.play()

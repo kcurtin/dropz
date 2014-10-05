@@ -1,4 +1,5 @@
 var Drop = require('./drop')
+var Spell = require('./spell')
 var SprenEmitter = require('../prefabs/SprenEmitter');
 
 'use strict';
@@ -21,8 +22,6 @@ Player.prototype = Object.create(Phaser.Sprite.prototype);
 Player.prototype.constructor = Player;
 
 Player.prototype.update = function() {
-  this.game.physics.arcade.collide(this.emitter, this.game.enemies, this.dealDamage, null, this);
-
   this.body.velocity.y = 0;
   this.body.velocity.x = 0;
   this.body.angularVelocity = 0;
@@ -63,12 +62,9 @@ Player.prototype.dropBelt = function() {
 }
 
 Player.prototype.particleBurst = function() {
-  this.emitter = new SprenEmitter(this.game, this.x, this.y, 100);
+  // this.spell = new SprenEmitter(this.game, this.x, this.y, 1);
+  this.spell = new Spell(this.game, this.x - this.width, this.y - this.height, 'corona');
   this.bringToTop();
-}
-
-Player.prototype.dealDamage = function(emitter, enemy) {
-  enemy.damageHandler()
 }
 
 Player.prototype.move = function() {
