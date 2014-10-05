@@ -7,7 +7,7 @@ var Spell = function(game, x, y, key) {
   this.active = true;
   this.damageAmount = 25;
   game.add.existing(this);
-  this.game.time.events.add(500, this.kill, this);
+  this.game.time.events.add(100, this.kill, this);
 };
 
 Spell.prototype = Object.create(Phaser.Sprite.prototype);

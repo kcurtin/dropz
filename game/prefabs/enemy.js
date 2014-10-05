@@ -32,7 +32,7 @@ Enemy.prototype.damageHandler = function (dmg) {
 Enemy.prototype.deathHandler = function (enemy) {
   var coinsSmallSound = enemy.game.add.audio('coinsSmall');
   coinsSmallSound.play()
-  var character = enemy.game.add.sprite(enemy.x, enemy.y, 'player2-die');
+  var character = enemy.game.add.sprite(enemy.x - 32, enemy.y - 32, 'player2-die');
   character.animations.add('die', [0,1,2,3,4,5,6,7], 10, false);
   character.animations.play("die");
   // enemy.game.time.events.add(1000, enemy.game.enemies.addEnemy, enemy);
