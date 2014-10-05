@@ -1,6 +1,7 @@
 var Drop = require('./drop')
 var Spell = require('./spell')
-var SprenEmitter = require('../prefabs/SprenEmitter');
+var Spren = require('./spren')
+var SprenEmitter = require('./SprenEmitter');
 
 'use strict';
 
@@ -25,6 +26,10 @@ Player.prototype.update = function() {
   this.body.velocity.y = 0;
   this.body.velocity.x = 0;
   this.body.angularVelocity = 0;
+
+  if (this.emitter) {
+    this.game.physics.arcade.overlap(this.emitter, this.game.enemies, this.emitter.dealDamage, null, this.emitter);
+  }
 
   if (this.upKey.isDown || this.downKey.isDown || this.leftKey.isDown || this.rightKey.isDown) {
 
@@ -61,9 +66,14 @@ Player.prototype.dropBelt = function() {
   new Drop(this.game, this, this.x, this.y);
 }
 
-Player.prototype.particleBurst = function() {
-  // this.spell = new SprenEmitter(this.game, this.x, this.y, 1);
+Player.prototype.castSpell = function() {
   this.spell = new Spell(this.game, this.x - this.width, this.y - this.height, 'corona');
+  this.bringToTop();
+}
+
+Player.prototype.particleBurst = function() {
+  this.emitter = new SprenEmitter(this.game, 0, 0);
+  this.addChild(this.emitter);
   this.bringToTop();
 }
 
@@ -87,10 +97,12 @@ Player.prototype.mapKeyboardControls = function() {
 
   this.dropKey  = this.game.input.keyboard.addKey(Phaser.Keyboard.R);
   this.dropKey2 = this.game.input.keyboard.addKey(Phaser.Keyboard.W);
+  this.dropKey3 = this.game.input.keyboard.addKey(Phaser.Keyboard.T);
 
   this.game.input.onDown.add(this.anglePlayer, this);
   this.dropKey.onDown.add(this.dropBelt, this);
-  this.dropKey2.onDown.add(this.particleBurst, this);
+  this.dropKey2.onDown.add(this.castSpell, this);
+  this.dropKey3.onDown.add(this.particleBurst, this);
 }
 
 module.exports = Player;

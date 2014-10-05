@@ -14,7 +14,6 @@ Spell.prototype = Object.create(Phaser.Sprite.prototype);
 Spell.prototype.constructor = Spell;
 
 Spell.prototype.update = function() {
-  // this.game.physics.arcade.collide(this.spell, this.game.enemies, this.dealDamage, null, this);
   this.game.physics.arcade.overlap(this, this.game.enemies, this.dealDamage, null, this);
 
 };
