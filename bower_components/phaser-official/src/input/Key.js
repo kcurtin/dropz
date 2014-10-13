@@ -5,8 +5,9 @@
 */
 
 /**
+* If you need more fine-grained control over the handling of specific keys you can create and use Phaser.Key objects.
+* 
 * @class Phaser.Key
-* @classdesc If you need more fine-grained control over the handling of specific keys you can create and use Phaser.Key objects.
 * @constructor
 * @param {Phaser.Game} game - Current game instance.
 * @param {number} keycode - The key code this Key is responsible for.
@@ -216,7 +217,7 @@ Phaser.Key.prototype = {
     },
 
     /**
-    * Returns the "just pressed" state of the Key. Just pressed is considered true if the key was pressed down within the duration given (default 250ms)
+    * Returns the "just pressed" state of the Key. Just pressed is considered true if the key was pressed down within the duration given.
     * @method Phaser.Key#justPressed
     * @param {number} [duration=50] - The duration below which the key is considered as being just pressed.
     * @return {boolean} True if the key is just pressed otherwise false.
@@ -230,7 +231,7 @@ Phaser.Key.prototype = {
     },
 
     /**
-    * Returns the "just released" state of the Key. Just released is considered as being true if the key was released within the duration given (default 250ms)
+    * Returns the "just released" state of the Key. Just released is considered as being true if the key was released within the duration given.
     * @method Phaser.Key#justReleased
     * @param {number} [duration=50] - The duration below which the key is considered as being just released.
     * @return {boolean} True if the key is just released otherwise false.

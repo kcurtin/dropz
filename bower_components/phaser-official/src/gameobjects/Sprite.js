@@ -5,14 +5,13 @@
 */
 
 /**
-* @class Phaser.Sprite
-*
-* @classdesc Create a new `Sprite` object. Sprites are the lifeblood of your game, used for nearly everything visual.
+* Sprites are the lifeblood of your game, used for nearly everything visual.
 *
 * At its most basic a Sprite consists of a set of coordinates and a texture that is rendered to the canvas.
 * They also contain additional properties allowing for physics motion (via Sprite.body), input handling (via Sprite.input),
 * events (via Sprite.events), animation (via Sprite.animations), camera culling and more. Please see the Examples for use cases.
 *
+* @class Phaser.Sprite
 * @constructor
 * @extends PIXI.Sprite
 * @param {Phaser.Game} game - A reference to the currently running game.
@@ -355,14 +354,21 @@ Phaser.Sprite.prototype.postUpdate = function() {
 * @memberof Phaser.Sprite
 * @param {string|Phaser.RenderTexture|Phaser.BitmapData|PIXI.Texture} key - This is the image or texture used by the Sprite during rendering. It can be a string which is a reference to the Cache entry, or an instance of a RenderTexture, BitmapData or PIXI.Texture.
 * @param {string|number} [frame] - If this Sprite is using part of a sprite sheet or texture atlas you can specify the exact frame to use by giving a string or numeric index.
+* @param {boolean} [stopAnimation=true] - If an animation is already playing on this Sprite you can choose to stop it or let it carry on playing.
 */
-Phaser.Sprite.prototype.loadTexture = function (key, frame) {
+Phaser.Sprite.prototype.loadTexture = function (key, frame, stopAnimation) {
 
     frame = frame || 0;
+
+    if (stopAnimation || typeof stopAnimation === 'undefined')
+    {
+        this.animations.stop();
+    }
 
     this.key = key;
 
     var setFrame = true;
+    var smoothed = this.smoothed;
 
     if (key instanceof Phaser.RenderTexture)
     {
@@ -371,7 +377,13 @@ Phaser.Sprite.prototype.loadTexture = function (key, frame) {
     }
     else if (key instanceof Phaser.BitmapData)
     {
+        //  This works from a reference, which probably isn't what we need here
         this.setTexture(key.texture);
+
+        if (this.game.cache.getFrameData(key.key, Phaser.Cache.BITMAPDATA))
+        {
+            setFrame = !this.animations.loadFrameData(this.game.cache.getFrameData(key.key, Phaser.Cache.BITMAPDATA), frame);
+        }
     }
     else if (key instanceof PIXI.Texture)
     {
@@ -394,16 +406,18 @@ Phaser.Sprite.prototype.loadTexture = function (key, frame) {
         {
             this.setTexture(new PIXI.Texture(PIXI.BaseTextureCache[key]));
 
-            if (this.animations)
-            {
-                setFrame = !this.animations.loadFrameData(this.game.cache.getFrameData(key), frame);
-            }
+            setFrame = !this.animations.loadFrameData(this.game.cache.getFrameData(key), frame);
         }
     }
 
     if (setFrame)
     {
         this._frame = Phaser.Rectangle.clone(this.texture.frame);
+    }
+
+    if (!smoothed)
+    {
+        this.smoothed = false;
     }
 
 };
@@ -448,6 +462,10 @@ Phaser.Sprite.prototype.setFrame = function(frame) {
         this.texture.height = frame.sourceSizeH;
         this.texture.frame.width = frame.sourceSizeW;
         this.texture.frame.height = frame.sourceSizeH;
+    }
+    else if (!frame.trimmed && this.texture.trim)
+    {
+        this.texture.trim = null;
     }
 
     if (this.cropRect)
@@ -634,6 +652,11 @@ Phaser.Sprite.prototype.destroy = function(destroyChildren) {
     if (typeof destroyChildren === 'undefined') { destroyChildren = true; }
 
     this._cache[8] = 1;
+
+    if (this.events)
+    {
+        this.events.onDestroy.dispatch(this);
+    }
 
     if (this.parent)
     {

@@ -12,9 +12,8 @@
 * arguments passed can be flat x,y values e.g. `new Phaser.Polygon(x,y, x,y, x,y, ...)` where `x` and `y` are numbers.
 *
 * @class Phaser.Polygon
-* @classdesc The polygon represents a list of orderded points in space
 * @constructor
-* @param {Array<Phaser.Point>|Array<number>} points - The array of Points.
+* @param {Phaser.Point[]|number[]} points - The array of Points.
 */
 Phaser.Polygon = function (points) {
 
@@ -23,42 +22,20 @@ Phaser.Polygon = function (points) {
     */
     this.type = Phaser.POLYGON;
 
-    //if points isn't an array, use arguments as the array
-    if (!(points instanceof Array))
-    {
-        points = Array.prototype.slice.call(arguments);
-    }
-
-    //if this is a flat array of numbers, convert it to points
-    if (typeof points[0] === 'number')
-    {
-        var p = [];
-
-        for (var i = 0, len = points.length; i < len; i += 2)
-        {
-            p.push(new Phaser.Point(points[i], points[i + 1]));
-        }
-
-        points = p;
-    }
-
-    /**
-    * @property {array<Phaser.Point>|array<number>} points - The array of vertex Points.
-    * @private
-    */
-    this._points = points;
-
+    this.points = points;
 };
 
 Phaser.Polygon.prototype = {
 
     /**
-    * Creates a clone of this polygon.
-    *
-    * @method Phaser.Polygon#clone
-    * @return {Phaser.Polygon} A copy of the polygon.
-    */
-    clone: function () {
+     * Creates a copy of the given Polygon.
+     * This is a deep clone, the resulting copy contains new Phaser.Point objects
+     *
+     * @method Phaser.Polygon#clone
+     * @param {Phaser.Polygon} [output] Optional Polygon object. If given the values will be set into this object, otherwise a brand new Polygon object will be created and returned.
+     * @return {Phaser.Polygon} The new Polygon object.
+     */
+    clone: function (output) {
 
         var points = [];
 
@@ -67,7 +44,16 @@ Phaser.Polygon.prototype = {
             points.push(this.points[i].clone());
         }
 
-        return new Phaser.Polygon(points);
+        if (typeof output === "undefined" || output === null)
+        {
+            output = new Phaser.Polygon(points);
+        }
+        else
+        {
+            output.setTo(points);
+        }
+
+        return output;
 
     },
 
@@ -100,6 +86,14 @@ Phaser.Polygon.prototype = {
         }
 
         return inside;
+
+    },
+
+    setTo : function(points) {
+
+        this.points = points;
+
+        return this;
 
     }
 

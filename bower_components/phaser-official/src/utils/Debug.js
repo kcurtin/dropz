@@ -140,6 +140,25 @@ Phaser.Utils.Debug.prototype = {
     },
 
     /**
+    * Clears the Debug canvas.
+    *
+    * @method Phaser.Utils.Debug#reset
+    */
+    reset: function () {
+
+        if (this.context)
+        {
+            this.context.clearRect(0, 0, this.game.width, this.game.height);
+        }
+
+        if (this.sprite)
+        {
+            PIXI.updateWebGLTexture(this.baseTexture, this.game.renderer.gl);
+        }
+
+    },
+
+    /**
     * Internal method that resets and starts the debug output values.
     *
     * @method Phaser.Utils.Debug#start
@@ -267,7 +286,12 @@ Phaser.Utils.Debug.prototype = {
         this.start(x, y, color);
         this.line('Camera (' + camera.width + ' x ' + camera.height + ')');
         this.line('X: ' + camera.x + ' Y: ' + camera.y);
-        this.line('Bounds x: ' + camera.bounds.x + ' Y: ' + camera.bounds.y + ' w: ' + camera.bounds.width + ' h: ' + camera.bounds.height);
+
+        if (camera.bounds)
+        {
+            this.line('Bounds x: ' + camera.bounds.x + ' Y: ' + camera.bounds.y + ' w: ' + camera.bounds.width + ' h: ' + camera.bounds.height);
+        }
+
         this.line('View x: ' + camera.view.x + ' Y: ' + camera.view.y + ' w: ' + camera.view.width + ' h: ' + camera.view.height);
         this.stop();
 
@@ -430,6 +454,21 @@ Phaser.Utils.Debug.prototype = {
         bounds.y += this.game.camera.y;
 
         this.rectangle(bounds, color, filled);
+
+    },
+    /**
+    * Renders the Rope's segments. Note: This is really expensive as it has to calculate new segments everytime you call it
+    *
+    * @method Phaser.Utils.Debug#ropeSegments
+    * @param {Phaser.Rope} rope - The rope to display the segments of.
+    * @param {string} [color] - Color of the debug info to be rendered (format is css color string).
+    * @param {boolean} [filled=true] - Render the rectangle as a fillRect (default, true) or a strokeRect (false)
+    */
+    ropeSegments: function(rope, color, filled) {
+        var segments = rope.segments;
+        segments.forEach(function(segment) {
+            this.rectangle(segment, color, filled);
+        }, this);
 
     },
 
@@ -701,18 +740,22 @@ Phaser.Utils.Debug.prototype = {
 
         if (sprite.body)
         {
+            this.start();
+
             if (sprite.body.type === Phaser.Physics.ARCADE)
             {
-                this.start();
                 Phaser.Physics.Arcade.Body.render(this.context, sprite.body, color, filled);
-                this.stop();
             }
             else if (sprite.body.type === Phaser.Physics.NINJA)
             {
-                this.start();
                 Phaser.Physics.Ninja.Body.render(this.context, sprite.body, color, filled);
-                this.stop();
             }
+            else if (sprite.body.type === Phaser.Physics.BOX2D)
+            {
+                Phaser.Physics.Box2D.renderBody(this.context, sprite.body, color);
+            }
+
+            this.stop();
         }
 
     },
@@ -730,13 +773,53 @@ Phaser.Utils.Debug.prototype = {
 
         if (sprite.body)
         {
+            this.start(x, y, color, 210);
+
             if (sprite.body.type === Phaser.Physics.ARCADE)
             {
-                this.start(x, y, color, 210);
                 Phaser.Physics.Arcade.Body.renderBodyInfo(this, sprite.body);
-                this.stop();
             }
+            else if (sprite.body.type === Phaser.Physics.BOX2D)
+            {
+                this.game.physics.box2d.renderBodyInfo(this, sprite.body);
+            }
+
+            this.stop();
         }
+
+    },
+
+    /**
+    * Renders 'debug draw' data for the Box2D world if it exists.
+    * This uses the standard debug drawing feature of Box2D, so colors will be decided by
+    * the Box2D engine.
+    *
+    * @method Phaser.Utils.Debug#box2dWorld
+    */
+    box2dWorld: function () {
+    
+        this.start();
+        
+        this.context.translate(-this.game.camera.view.x, -this.game.camera.view.y, 0);
+        this.game.physics.box2d.renderDebugDraw(this.context);
+        
+        this.stop();
+
+    },
+
+    /**
+    * Renders 'debug draw' data for the given Box2D body.
+    * This uses the standard debug drawing feature of Box2D, so colors will be decided by the Box2D engine.
+    *
+    * @method Phaser.Utils.Debug#box2dBody
+    * @param {Phaser.Sprite} sprite - The sprite whos body will be rendered.
+    * @param {string} [color='rgb(0,255,0)'] - color of the debug info to be rendered. (format is css color string).
+    */
+    box2dBody: function (body, color) {
+    
+        this.start();
+        Phaser.Physics.Box2D.renderBody(this.context, body, color);
+        this.stop();
 
     }
 

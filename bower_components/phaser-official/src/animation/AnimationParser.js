@@ -59,7 +59,7 @@ Phaser.AnimationParser = {
         //  Zero or smaller than frame sizes?
         if (width === 0 || height === 0 || width < frameWidth || height < frameHeight || total === 0)
         {
-            console.warn("Phaser.AnimationParser.spriteSheet: width/height zero or width/height < given frameWidth/frameHeight");
+            console.warn("Phaser.AnimationParser.spriteSheet: '" + key + "'s width/height zero or width/height < given frameWidth/frameHeight");
             return null;
         }
 
@@ -74,6 +74,13 @@ Phaser.AnimationParser = {
 
             //  uuid needed?
             data.addFrame(new Phaser.Frame(i, x, y, frameWidth, frameHeight, '', uuid));
+
+            PIXI.TextureCache[uuid] = new PIXI.Texture(PIXI.BaseTextureCache[key], {
+                x: x,
+                y: y,
+                width: frameWidth,
+                height: frameHeight
+            });
 
             x += frameWidth + spacing;
 
@@ -94,9 +101,10 @@ Phaser.AnimationParser = {
     * @method Phaser.AnimationParser.JSONData
     * @param {Phaser.Game} game - A reference to the currently running game.
     * @param {Object} json - The JSON data from the Texture Atlas. Must be in Array format.
+    * @param {string} cacheKey - The Game.Cache asset key of the texture image.
     * @return {Phaser.FrameData} A FrameData object containing the parsed frames.
     */
-    JSONData: function (game, json) {
+    JSONData: function (game, json, cacheKey) {
 
         //  Malformed?
         if (!json['frames'])
@@ -127,6 +135,13 @@ Phaser.AnimationParser = {
                 uuid
             ));
 
+            PIXI.TextureCache[uuid] = new PIXI.Texture(PIXI.BaseTextureCache[cacheKey], {
+                x: frames[i].frame.x,
+                y: frames[i].frame.y,
+                width: frames[i].frame.w,
+                height: frames[i].frame.h
+            });
+
             if (frames[i].trimmed)
             {
                 newFrame.setTrim(
@@ -151,9 +166,10 @@ Phaser.AnimationParser = {
     * @method Phaser.AnimationParser.JSONDataHash
     * @param {Phaser.Game} game - A reference to the currently running game.
     * @param {Object} json - The JSON data from the Texture Atlas. Must be in JSON Hash format.
+    * @param {string} cacheKey - The Game.Cache asset key of the texture image.
     * @return {Phaser.FrameData} A FrameData object containing the parsed frames.
     */
-    JSONDataHash: function (game, json) {
+    JSONDataHash: function (game, json, cacheKey) {
 
         //  Malformed?
         if (!json['frames'])
@@ -185,6 +201,13 @@ Phaser.AnimationParser = {
                 uuid
             ));
 
+            PIXI.TextureCache[uuid] = new PIXI.Texture(PIXI.BaseTextureCache[cacheKey], {
+                x: frames[key].frame.x,
+                y: frames[key].frame.y,
+                width: frames[key].frame.w,
+                height: frames[key].frame.h
+            });
+
             if (frames[key].trimmed)
             {
                 newFrame.setTrim(
@@ -211,9 +234,10 @@ Phaser.AnimationParser = {
     * @method Phaser.AnimationParser.XMLData
     * @param {Phaser.Game} game - A reference to the currently running game.
     * @param {Object} xml - The XML data from the Texture Atlas. Must be in Starling XML format.
+    * @param {string} cacheKey - The Game.Cache asset key of the texture image.
     * @return {Phaser.FrameData} A FrameData object containing the parsed frames.
     */
-    XMLData: function (game, xml) {
+    XMLData: function (game, xml, cacheKey) {
 
         //  Malformed?
         if (!xml.getElementsByTagName('TextureAtlas'))
@@ -244,27 +268,33 @@ Phaser.AnimationParser = {
             uuid = game.rnd.uuid();
 
             frame = frames[i].attributes;
-
-            name = frame.name.nodeValue;
-            x = parseInt(frame.x.nodeValue, 10);
-            y = parseInt(frame.y.nodeValue, 10);
-            width = parseInt(frame.width.nodeValue, 10);
-            height = parseInt(frame.height.nodeValue, 10);
+            
+            name = frame.name.value;
+            x = parseInt(frame.x.value, 10);
+            y = parseInt(frame.y.value, 10);
+            width = parseInt(frame.width.value, 10);
+            height = parseInt(frame.height.value, 10);
 
             frameX = null;
             frameY = null;
 
             if (frame.frameX)
             {
-                frameX = Math.abs(parseInt(frame.frameX.nodeValue, 10));
-                frameY = Math.abs(parseInt(frame.frameY.nodeValue, 10));
-                frameWidth = parseInt(frame.frameWidth.nodeValue, 10);
-                frameHeight = parseInt(frame.frameHeight.nodeValue, 10);
+                frameX = Math.abs(parseInt(frame.frameX.value, 10));
+                frameY = Math.abs(parseInt(frame.frameY.value, 10));
+                frameWidth = parseInt(frame.frameWidth.value, 10);
+                frameHeight = parseInt(frame.frameHeight.value, 10);
             }
 
             newFrame = data.addFrame(new Phaser.Frame(i, x, y, width, height, name, uuid));
 
-            //  Trimmed?
+            PIXI.TextureCache[uuid] = new PIXI.Texture(PIXI.BaseTextureCache[cacheKey], {
+                x: x,
+                y: y,
+                width: width,
+                height: height
+            });
+                        //  Trimmed?
             if (frameX !== null || frameY !== null)
             {
                 newFrame.setTrim(true, width, height, frameX, frameY, frameWidth, frameHeight);

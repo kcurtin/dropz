@@ -31,7 +31,7 @@ HealthBar.prototype.updateHealth = function() {
   this.bmd.ctx.fill();
   this.bmd.ctx.closePath();
   this.bmd.render();
-  this.bmd.refreshBuffer();
+  this.bmd.update();
 }
 
 HealthBar.prototype.colorBar = function(percent) {

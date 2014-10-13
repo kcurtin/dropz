@@ -5,14 +5,14 @@
 */
 
 /**
-* Creates a new Circle object with the center coordinate specified by the x and y parameters and the diameter specified by the diameter parameter. If you call this function without parameters, a circle with x, y, diameter and radius properties set to 0 is created.
-* @class Circle
-* @classdesc Phaser - Circle
+* Creates a new Circle object with the center coordinate specified by the x and y parameters and the diameter specified by the diameter parameter.
+* If you call this function without parameters, a circle with x, y, diameter and radius properties set to 0 is created.
+* 
+* @class Phaser.Circle
 * @constructor
 * @param {number} [x=0] - The x coordinate of the center of the circle.
 * @param {number} [y=0] - The y coordinate of the center of the circle.
 * @param {number} [diameter=0] - The diameter of the circle.
-* @return {Phaser.Circle} This circle object
 */
 Phaser.Circle = function (x, y, diameter) {
 
@@ -67,7 +67,7 @@ Phaser.Circle.prototype = {
     * @method Phaser.Circle#setTo
     * @param {number} x - The x coordinate of the center of the circle.
     * @param {number} y - The y coordinate of the center of the circle.
-    * @param {number} diameter - The diameter of the circle in pixels.
+    * @param {number} diameter - The diameter of the circle.
     * @return {Circle} This circle object.
     */
     setTo: function (x, y, diameter) {
@@ -135,21 +135,21 @@ Phaser.Circle.prototype = {
     /**
     * Returns a new Circle object with the same values for the x, y, width, and height properties as this Circle object.
     * @method Phaser.Circle#clone
-    * @param {Phaser.Circle} out - Optional Circle object. If given the values will be set into the object, otherwise a brand new Circle object will be created and returned.
+    * @param {Phaser.Circle} output - Optional Circle object. If given the values will be set into the object, otherwise a brand new Circle object will be created and returned.
     * @return {Phaser.Circle} The cloned Circle object.
     */
-    clone: function (out) {
+    clone: function (output) {
 
-        if (typeof out === "undefined")
+        if (typeof output === "undefined" || output === null)
         {
-            out = new Phaser.Circle(this.x, this.y, this.diameter);
+            output = new Phaser.Circle(this.x, this.y, this.diameter);
         }
         else
         {
-            out.setTo(this.x, this.y, this.diameter);
+            output.setTo(this.x, this.y, this.diameter);
         }
 
-        return out;
+        return output;
 
     },
 

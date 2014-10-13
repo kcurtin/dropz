@@ -7,14 +7,13 @@
 
 /**
 * Creates a Ellipse object. A curve on a plane surrounding two focal points.
-* @class Ellipse
-* @classdesc Phaser - Ellipse
+* 
+* @class Phaser.Ellipse
 * @constructor
 * @param {number} [x=0] - The X coordinate of the upper-left corner of the framing rectangle of this ellipse.
 * @param {number} [y=0] - The Y coordinate of the upper-left corner of the framing rectangle of this ellipse.
 * @param {number} [width=0] - The overall width of this ellipse.
 * @param {number} [height=0] - The overall height of this ellipse.
-* @return {Phaser.Ellipse} This Ellipse object
 */
 Phaser.Ellipse = function (x, y, width, height) {
 
@@ -82,7 +81,7 @@ Phaser.Ellipse.prototype = {
     },
 
     /**
-    * Copies the x, y and diameter properties from this Circle to any given object.
+    * Copies the x, y, width and height properties from this Ellipse to any given object.
     * @method Phaser.Ellipse#copyTo
     * @param {any} dest - The object to copy to.
     * @return {Object} This dest object.
@@ -101,21 +100,21 @@ Phaser.Ellipse.prototype = {
     /**
     * Returns a new Ellipse object with the same values for the x, y, width, and height properties as this Ellipse object.
     * @method Phaser.Ellipse#clone
-    * @param {Phaser.Ellipse} out - Optional Ellipse object. If given the values will be set into the object, otherwise a brand new Ellipse object will be created and returned.
+    * @param {Phaser.Ellipse} output - Optional Ellipse object. If given the values will be set into the object, otherwise a brand new Ellipse object will be created and returned.
     * @return {Phaser.Ellipse} The cloned Ellipse object.
     */
-    clone: function(out) {
+    clone: function(output) {
 
-        if (typeof out === "undefined")
+        if (typeof output === "undefined" || output === null)
         {
-            out = new Phaser.Ellipse(this.x, this.y, this.width, this.height);
+            output = new Phaser.Ellipse(this.x, this.y, this.width, this.height);
         }
         else
         {
-            out.setTo(this.x, this.y, this.width, this.height);
+            output.setTo(this.x, this.y, this.width, this.height);
         }
 
-        return out;
+        return output;
 
     },
 

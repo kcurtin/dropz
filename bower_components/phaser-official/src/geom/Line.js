@@ -6,14 +6,13 @@
 
 /**
 * Creates a new Line object with a start and an end point.
-* @class Line
-* @classdesc Phaser - Line
+* 
+* @class Phaser.Line
 * @constructor
 * @param {number} [x1=0] - The x coordinate of the start of the line.
 * @param {number} [y1=0] - The y coordinate of the start of the line.
 * @param {number} [x2=0] - The x coordinate of the end of the line.
 * @param {number} [y2=0] - The y coordinate of the end of the line.
-* @return {Phaser.Line} This line object
 */
 Phaser.Line = function (x1, y1, x2, y2) {
 
@@ -71,10 +70,8 @@ Phaser.Line.prototype = {
         {
             return this.setTo(startSprite.center.x, startSprite.center.y, endSprite.center.x, endSprite.center.y);
         }
-        else
-        {
-            return this.setTo(startSprite.x, startSprite.y, endSprite.x, endSprite.y);
-        }
+
+        return this.setTo(startSprite.x, startSprite.y, endSprite.x, endSprite.y);
 
     },
 
@@ -181,6 +178,27 @@ Phaser.Line.prototype = {
         }
 
         return results;
+
+    },
+
+    /**
+     * Returns a new Line object with the same values for the start and end properties as this Line object.
+     * @method Phaser.Line#clone
+     * @param {Phaser.Line} output - Optional Line object. If given the values will be set into the object, otherwise a brand new Line object will be created and returned.
+     * @return {Phaser.Line} The cloned Line object.
+     */
+    clone: function (output) {
+
+        if (typeof output === "undefined" || output === null)
+        {
+            output = new Phaser.Line(this.start.x, this.start.y, this.end.x, this.end.y);
+        }
+        else
+        {
+            output.setTo(this.start.x, this.start.y, this.end.x, this.end.y);
+        }
+
+        return output;
 
     }
 

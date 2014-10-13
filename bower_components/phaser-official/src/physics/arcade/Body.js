@@ -9,7 +9,6 @@
 * the Sprite itself. For example you can set the velocity, acceleration, bounce values etc all on the Body.
 *
 * @class Phaser.Physics.Arcade.Body
-* @classdesc Arcade Physics Body Constructor
 * @constructor
 * @param {Phaser.Sprite} sprite - The Sprite object this physics body belongs to.
 */
@@ -298,6 +297,11 @@ Phaser.Physics.Arcade.Body = function (sprite) {
     this.phase = 0;
 
     /**
+    * @property {boolean} skipQuadTree - If true and you collide this Sprite against a Group, it will disable the collision check from using a QuadTree.
+    */
+    this.skipQuadTree = false;
+
+    /**
     * @property {boolean} _reset - Internal cache var.
     * @private
     */
@@ -528,6 +532,7 @@ Phaser.Physics.Arcade.Body.prototype = {
     */
     destroy: function () {
 
+        this.sprite.body = null;
         this.sprite = null;
 
     },

@@ -380,6 +380,11 @@ Phaser.Keyboard.prototype = {
 
         this.pressEvent = event;
 
+        if (this.game.input.disabled || this.disabled)
+        {
+            return;
+        }
+
         if (this.onPressCallback)
         {
             this.onPressCallback.call(this.callbackContext, String.fromCharCode(event.charCode), event);
@@ -651,3 +656,5 @@ Phaser.Keyboard.INSERT = 45;
 Phaser.Keyboard.DELETE = 46;
 Phaser.Keyboard.HELP = 47;
 Phaser.Keyboard.NUM_LOCK = 144;
+Phaser.Keyboard.PLUS = 43;
+Phaser.Keyboard.MINUS = 45;

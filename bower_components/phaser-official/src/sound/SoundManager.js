@@ -5,14 +5,12 @@
 */
 
 /**
-* Sound Manager constructor.
 * The Sound Manager is responsible for playing back audio via either the Legacy HTML Audio tag or via Web Audio if the browser supports it.
 * Note: On Firefox 25+ on Linux if you have media.gstreamer disabled in about:config then it cannot play back mp3 or m4a files.
 * The audio file type and the encoding of those files are extremely important. Not all browsers can play all audio formats.
 * There is a good guide to what's supported here: http://hpr.dogphilosophy.net/test/
 *
 * @class Phaser.SoundManager
-* @classdesc Phaser Sound Manager.
 * @constructor
 * @param {Phaser.Game} game reference to the current game instance.
 */
@@ -369,6 +367,21 @@ Phaser.SoundManager.prototype = {
     },
 
     /**
+     * Adds a new AudioSprite into the SoundManager.
+     *
+     * @method Phaser.SoundManager#addSprite
+     * @param {string} key - Asset key for the sound.
+     * @return {Phaser.AudioSprite} The new AudioSprite instance.
+     */
+    addSprite: function(key) {
+
+        var audioSprite = new Phaser.AudioSprite(this.game, key);
+
+        return audioSprite;
+
+    },
+
+    /**
     * Removes a Sound from the SoundManager. The removed Sound is destroyed before removal.
     *
     * @method Phaser.SoundManager#remove
@@ -499,6 +512,28 @@ Phaser.SoundManager.prototype = {
                 this._sounds[i].mute = false;
             }
         }
+
+    },
+
+    /**
+    * Stops all the sounds in the game, then destroys them and finally clears up any callbacks.
+    *
+    * @method Phaser.SoundManager#destroy
+    */
+    destroy: function () {
+
+        this.stopAll();
+
+        for (var i = 0; i < this._sounds.length; i++)
+        {
+            if (this._sounds[i])
+            {
+                this._sounds[i].destroy();
+            }
+        }
+
+        this._sounds = [];
+        this.onSoundDecode.dispose();
 
     }
 

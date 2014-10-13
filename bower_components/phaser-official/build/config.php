@@ -9,9 +9,14 @@
         $p2 = true;
     }
 
+    if (!isset($box2d))
+    {
+        $box2d = false;
+    }
+
     if (!isset($ninja))
     {
-        $ninja = true;
+        $ninja = false;
     }
 
     if (!isset($arcade))
@@ -24,14 +29,14 @@
         echo "    <script src=\"$path/src/physics/p2/p2.js\"></script>";
     }
 
+    if ($box2d)
+    {
+        echo "    <script src=\"$box2dpath/box2d-html5.js\"></script>";
+    }
+
     echo <<<EOL
 
     <script src="$path/src/pixi/Pixi.js"></script>
-    <script src="$path/src/pixi/core/Point.js"></script>
-    <script src="$path/src/pixi/core/Rectangle.js"></script>
-    <script src="$path/src/pixi/core/Polygon.js"></script>
-    <script src="$path/src/pixi/core/Circle.js"></script>
-    <script src="$path/src/pixi/core/Ellipse.js"></script>
     <script src="$path/src/pixi/core/Matrix.js"></script>
     <script src="$path/src/pixi/display/DisplayObject.js"></script>
     <script src="$path/src/pixi/display/DisplayObjectContainer.js"></script>
@@ -96,6 +101,8 @@
     <script src="$path/src/core/Group.js"></script>
     <script src="$path/src/core/World.js"></script>
     <script src="$path/src/core/Game.js"></script>
+    <script src="$path/src/core/FlexGrid.js"></script>
+    <script src="$path/src/core/FlexLayer.js"></script>
     <script src="$path/src/core/ScaleManager.js"></script>
 
     <script src="$path/src/input/Input.js"></script>
@@ -125,6 +132,7 @@
     <script src="$path/src/gameobjects/SpriteBatch.js"></script>
     <script src="$path/src/gameobjects/RetroFont.js"></script>
     <script src="$path/src/gameobjects/Particle.js"></script>
+    <script src="$path/src/gameobjects/Rope.js"></script>
 
     <script src="$path/src/system/Canvas.js"></script>
     <script src="$path/src/system/Device.js"></script>
@@ -154,6 +162,7 @@
     <script src="$path/src/loader/Loader.js"></script>
     <script src="$path/src/loader/LoaderParser.js"></script>
 
+    <script src="$path/src/sound/AudioSprite.js"></script>
     <script src="$path/src/sound/Sound.js"></script>
     <script src="$path/src/sound/SoundManager.js"></script>
 
@@ -194,6 +203,7 @@ EOL;
     <script src="$path/src/physics/p2/Body.js"></script>
     <script src="$path/src/physics/p2/BodyDebug.js"></script>
     <script src="$path/src/physics/p2/Spring.js"></script>
+    <script src="$path/src/physics/p2/RotationalSpring.js"></script>
     <script src="$path/src/physics/p2/Material.js"></script>
     <script src="$path/src/physics/p2/ContactMaterial.js"></script>
     <script src="$path/src/physics/p2/CollisionGroup.js"></script>
@@ -220,4 +230,24 @@ EOL;
 EOL;
     }
 
+    if ($box2d)
+    {
+        echo <<<EOL
+
+    <script src="$box2dpath/World.js"></script>
+    <script src="$box2dpath/Body.js"></script>
+    <script src="$box2dpath/PointProxy.js"></script>
+    <script src="$box2dpath/DefaultDebugDraw.js"></script>
+    <script src="$box2dpath/DefaultContactListener.js"></script>
+    <script src="$box2dpath/Polygon.js"></script>
+EOL;
+    }
+
+    if (isset($custom))
+    {
+        for ($i = 0; $i < count($custom); $i++)
+        {
+            echo '    <script src="' . $custom[$i] . '"></script>' . "\n";
+        }
+    }
 ?>
