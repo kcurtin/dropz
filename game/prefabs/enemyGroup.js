@@ -12,8 +12,8 @@ EnemyGroup.prototype.constructor = EnemyGroup;
 EnemyGroup.prototype.update = function() {
 };
 
-EnemyGroup.prototype.addEnemy = function() {
-  new Enemy(this.game, 250, 250, 0);
+EnemyGroup.prototype.addEnemy = function(x, y) {
+  new Enemy(this.game, x, y, 0);
 };
 
 EnemyGroup.prototype.addRandEnemies = function(num) {

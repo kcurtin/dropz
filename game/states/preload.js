@@ -7,7 +7,7 @@ function Preload() {
 
 Preload.prototype = {
   preload: function() {
-    this.load.tilemap('lvl1', 'assets/wasteland1.json', null, Phaser.Tilemap.TILED_JSON);
+    this.load.tilemap('lvl1', 'assets/waste-simple.json', null, Phaser.Tilemap.TILED_JSON);
     this.load.image("wastelandTiles", "assets/war2-wasteland-tiles.png");
 
     this.coinsSmall = this.game.load.audio('coinsSmall', 'assets/coins_small.ogg');
